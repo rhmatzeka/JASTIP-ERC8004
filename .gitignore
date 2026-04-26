@@ -1,0 +1,10 @@
+.next
+node_modules
+artifacts
+cache
+coverage
+.env
+.env.local
+.jastip-agent-db.json
+next-dev*.log
+typechain-types
