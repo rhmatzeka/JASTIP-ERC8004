@@ -14,10 +14,10 @@ export default function ReputationPage() {
   }, []);
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="page-shell">
       <div className="mb-6">
-        <p className="text-sm font-bold text-ocean">ERC-8004-style agent registry</p>
-        <h1 className="mt-1 text-3xl font-black text-ink">Reputasi Jastiper</h1>
+        <p className="eyebrow">ERC-8004-style agent registry</p>
+        <h1 className="page-title">Reputasi Jastiper</h1>
       </div>
       <div className="grid gap-4">
         {reputations.length === 0 ? (

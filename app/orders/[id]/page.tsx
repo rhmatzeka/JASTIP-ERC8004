@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Check, ExternalLink, Loader2, UploadCloud } from "lucide-react";
 import EscrowBreakdown from "@/components/EscrowBreakdown";
@@ -16,7 +16,8 @@ import type { Order, VerificationReport as VerificationReportType } from "@/lib/
 
 export default function OrderDetailPage() {
   const params = useParams<{ id: string }>();
-  const { role, profile, setRole } = useDemoProfile();
+  const router = useRouter();
+  const { isReady, isLoggedIn, role, profile, setRole } = useDemoProfile();
   const [order, setOrder] = useState<Order | null>(null);
   const [report, setReport] = useState<VerificationReportType | null>(null);
   const [wallet, setWallet] = useState(profile.walletAddress);
@@ -33,6 +34,10 @@ export default function OrderDetailPage() {
   useEffect(() => {
     load();
   }, [params.id]);
+
+  useEffect(() => {
+    if (isReady && !isLoggedIn) router.push("/login");
+  }, [isReady, isLoggedIn, router]);
 
   useEffect(() => {
     setWallet(profile.walletAddress);
@@ -88,7 +93,7 @@ export default function OrderDetailPage() {
 
   if (!order) {
     return (
-      <main className="mx-auto max-w-7xl px-4 py-10">
+      <main className="page-shell">
         <div className="panel p-8 text-center text-muted">Loading order...</div>
       </main>
     );
@@ -101,14 +106,14 @@ export default function OrderDetailPage() {
   const canDecideFunds = role === "BUYER" && isBuyer && order.status === "VERIFIED";
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="page-shell">
       <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-start">
         <div>
           <div className="mb-2 flex items-center gap-3">
             <StatusBadge status={order.status} />
             <span className="text-sm text-muted">Order ID {order.id}</span>
           </div>
-          <h1 className="text-3xl font-black text-ink">{order.itemName}</h1>
+          <h1 className="page-title">{order.itemName}</h1>
           <p className="mt-2 text-muted">
             {order.brand} · {order.model} · {order.color} · {order.size}
           </p>
@@ -148,12 +153,12 @@ export default function OrderDetailPage() {
                 ["Country", order.destinationCountry],
                 ["Target store", order.targetStore],
                 ["Max budget", formatIdr(order.maxBudgetIdr)],
-                ["Buyer address", order.buyerWallet],
+                ["Customer address", order.buyerWallet],
                 ["Jastiper address", order.jastiperWallet || "Not accepted yet"],
                 ["Chain order ID", order.chainOrderId || "Mock pending"]
               ].map(([label, value]) => (
-                <div key={label} className="rounded-lg bg-cloud p-3">
-                  <p className="font-bold text-ink">{label}</p>
+                <div key={label} className="metric-tile">
+                  <p className="font-black text-ink">{label}</p>
                   <p className="mt-1 break-all text-muted">{value}</p>
                 </div>
               ))}
@@ -217,13 +222,13 @@ export default function OrderDetailPage() {
                 </div>
               ) : report && order.status === "VERIFIED" ? (
                 <div className="panel p-5">
-                  <p className="font-bold text-ink">Menunggu keputusan Buyer</p>
+                  <p className="font-bold text-ink">Menunggu keputusan Customer</p>
                   <p className="mt-2 text-sm text-muted">
-                    Hanya wallet buyer order ini yang bisa melepas dana atau membuka sengketa.
+                    Hanya wallet customer order ini yang bisa melepas dana atau membuka sengketa.
                   </p>
                   {!isBuyer ? (
                     <button className="btn-secondary mt-4" onClick={() => setRole("BUYER")}>
-                      Switch to Buyer
+                      Switch to Customer
                     </button>
                   ) : null}
                 </div>

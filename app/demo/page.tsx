@@ -2,11 +2,13 @@
 
 import Link from "next/link";
 import { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
 import { Database, FlaskConical, RefreshCw, Sparkles, UserPlus } from "lucide-react";
 import { useDemoProfile } from "@/lib/useDemoProfile";
 
 const actions = [
-  ["seed-order", "Seed demo buyer order", Database],
+  ["seed-order", "Seed demo customer order", Database],
   ["seed-jastiper", "Seed demo jastiper", UserPlus],
   ["approved-report", "Generate mock approved AI report", Sparkles],
   ["flagged-report", "Generate mock flagged AI report", FlaskConical],
@@ -15,9 +17,14 @@ const actions = [
 ] as const;
 
 export default function DemoPage() {
-  const { role, profile, setRole } = useDemoProfile();
+  const router = useRouter();
+  const { isReady, isLoggedIn, role, profile, setRole } = useDemoProfile();
   const [message, setMessage] = useState("");
   const [orderId, setOrderId] = useState("");
+
+  useEffect(() => {
+    if (isReady && !isLoggedIn) router.push("/login?role=ADMIN");
+  }, [isReady, isLoggedIn, router]);
 
   async function run(action: string) {
     setMessage("Running...");
@@ -32,10 +39,10 @@ export default function DemoPage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8">
+    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <p className="text-sm font-bold text-ocean">Hackathon-only controls</p>
-        <h1 className="mt-1 text-3xl font-black text-ink">Demo Admin</h1>
+        <p className="eyebrow">Hackathon-only controls</p>
+        <h1 className="page-title">Demo Admin</h1>
       </div>
       {role !== "ADMIN" ? (
         <section className="panel mb-6 p-5">
@@ -76,12 +83,12 @@ export default function DemoPage() {
       </section>
       <section className="mt-6 grid gap-4 md:grid-cols-3">
         {["Create order", "Accept as jastiper", "Upload proof and release"].map((title, index) => (
-          <div key={title} className="rounded-lg border border-line bg-white p-5">
-            <p className="text-sm font-black text-ocean">0{index + 1}</p>
+          <div key={title} className="panel p-5">
+            <p className="eyebrow">0{index + 1}</p>
             <h2 className="mt-2 text-lg font-bold text-ink">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-muted">
               {index === 0
-                ? "Seed the Nike Japan order or create a custom buyer order."
+                ? "Seed the Nike Japan order or create a custom customer order."
                 : index === 1
                   ? "Attach a jastiper wallet and registry identity."
                   : "Generate AI verification, release escrow, then show reputation."}

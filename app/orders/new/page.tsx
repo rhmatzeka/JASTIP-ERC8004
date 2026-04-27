@@ -12,7 +12,7 @@ import type { Country } from "@/lib/types";
 
 export default function NewOrderPage() {
   const router = useRouter();
-  const { role, profile, setRole } = useDemoProfile();
+  const { isReady, isLoggedIn, role, profile, setRole } = useDemoProfile();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
@@ -33,6 +33,10 @@ export default function NewOrderPage() {
   useEffect(() => {
     setForm((current) => ({ ...current, buyerWallet: profile.walletAddress }));
   }, [profile.walletAddress]);
+
+  useEffect(() => {
+    if (isReady && !isLoggedIn) router.push("/login?role=BUYER");
+  }, [isReady, isLoggedIn, router]);
 
   const breakdown = useMemo(
     () =>
@@ -62,19 +66,19 @@ export default function NewOrderPage() {
   }
 
   return (
-    <main className="mx-auto max-w-7xl px-4 py-8">
+    <main className="page-shell">
       <div className="mb-6">
-        <p className="text-sm font-bold text-ocean">Titip Barang</p>
-        <h1 className="mt-1 text-3xl font-black text-ink">Buat Order</h1>
+        <p className="eyebrow">Titip barang</p>
+        <h1 className="page-title">Buat Order</h1>
       </div>
       {role !== "BUYER" ? (
         <section className="panel mb-6 p-5">
-          <p className="font-bold text-ink">Halaman ini untuk Buyer.</p>
+          <p className="font-bold text-ink">Halaman ini untuk Customer.</p>
           <p className="mt-2 text-sm text-muted">
-            Kamu sedang memakai mode {profile.label}. Pindah ke Buyer untuk membuat order jastip sebagai customer.
+            Kamu sedang memakai mode {profile.label}. Pindah ke Customer untuk membuat order jastip.
           </p>
           <button className="btn-primary mt-4" onClick={() => setRole("BUYER")}>
-            Switch to Buyer
+            Switch to Customer
           </button>
         </section>
       ) : null}
@@ -89,7 +93,7 @@ export default function NewOrderPage() {
               ["size", "Size"],
               ["targetStore", "Target store"]
             ].map(([key, label]) => (
-              <label key={key} className="text-sm font-bold text-ink">
+              <label key={key} className="text-sm font-black text-ink">
                 {label}
                 <input
                   className="input mt-1"
@@ -98,7 +102,7 @@ export default function NewOrderPage() {
                 />
               </label>
             ))}
-            <label className="text-sm font-bold text-ink">
+            <label className="text-sm font-black text-ink">
               Destination country
               <select
                 className="input mt-1"
@@ -110,7 +114,7 @@ export default function NewOrderPage() {
                 <option>Singapore</option>
               </select>
             </label>
-            <label className="text-sm font-bold text-ink">
+            <label className="text-sm font-black text-ink">
               Estimated local price
               <input
                 className="input mt-1"
@@ -119,7 +123,7 @@ export default function NewOrderPage() {
                 onChange={(event) => setForm({ ...form, estimatedLocalPrice: Number(event.target.value) })}
               />
             </label>
-            <label className="text-sm font-bold text-ink">
+            <label className="text-sm font-black text-ink">
               Max budget in IDR
               <input
                 className="input mt-1"
@@ -128,7 +132,7 @@ export default function NewOrderPage() {
                 onChange={(event) => setForm({ ...form, maxBudgetIdr: Number(event.target.value) })}
               />
             </label>
-            <label className="text-sm font-bold text-ink">
+            <label className="text-sm font-black text-ink">
               Service fee percentage
               <input
                 className="input mt-1"
@@ -144,7 +148,7 @@ export default function NewOrderPage() {
               value={form.referencePhotoUrl}
               onChange={(referencePhotoUrl) => setForm({ ...form, referencePhotoUrl })}
             />
-            <WalletConnect value={form.buyerWallet} onChange={(buyerWallet) => setForm({ ...form, buyerWallet })} label="Buyer wallet address" />
+            <WalletConnect value={form.buyerWallet} onChange={(buyerWallet) => setForm({ ...form, buyerWallet })} label="Customer wallet address" />
           </div>
           <button className="btn-primary mt-6" onClick={submit} disabled={loading}>
             {loading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}

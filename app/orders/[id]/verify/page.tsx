@@ -10,7 +10,7 @@ import type { Order } from "@/lib/types";
 export default function VerifyOrderPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { role, profile, setRole } = useDemoProfile();
+  const { isReady, isLoggedIn, role, profile, setRole } = useDemoProfile();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [order, setOrder] = useState<Order | null>(null);
@@ -25,6 +25,10 @@ export default function VerifyOrderPage() {
       .then((response) => response.json())
       .then((data) => setOrder(data.order || null));
   }, [params.id]);
+
+  useEffect(() => {
+    if (isReady && !isLoggedIn) router.push("/login?role=JASTIPER");
+  }, [isReady, isLoggedIn, router]);
 
   const canUpload =
     role === "JASTIPER" &&
@@ -49,10 +53,10 @@ export default function VerifyOrderPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8">
+    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
       <div className="mb-6">
-        <p className="text-sm font-bold text-ocean">AI receipt and item check</p>
-        <h1 className="mt-1 text-3xl font-black text-ink">Upload Bukti Pembelian</h1>
+        <p className="eyebrow">AI receipt and item check</p>
+        <h1 className="page-title">Upload Bukti Pembelian</h1>
       </div>
       {!canUpload ? (
         <section className="panel mb-6 p-5">

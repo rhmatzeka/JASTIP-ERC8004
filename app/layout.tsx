@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { ShieldCheck } from "lucide-react";
+import { PackageCheck } from "lucide-react";
 import RoleSwitcher from "@/components/RoleSwitcher";
 import "./globals.css";
 
@@ -13,26 +13,26 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en">
       <body>
-        <header className="sticky top-0 z-30 border-b border-line bg-white/90 backdrop-blur">
-          <div className="mx-auto flex max-w-7xl items-center justify-between px-4 py-3">
-            <Link href="/" className="flex items-center gap-2 font-bold text-ink">
-              <span className="grid h-9 w-9 place-items-center rounded-lg bg-ocean text-white">
-                <ShieldCheck size={19} />
+        <header className="sticky top-0 z-30 border-b border-line bg-white/92 backdrop-blur-xl">
+          <div className="mx-auto flex max-w-7xl items-center justify-between gap-4 px-4 py-3 sm:px-6 lg:px-8">
+            <Link href="/" className="flex min-w-0 items-center gap-3 font-black text-ink">
+              <span className="grid h-10 w-10 shrink-0 place-items-center rounded-lg bg-ink text-white shadow-button">
+                <PackageCheck size={20} />
               </span>
-              Jastip Agent
+              <span className="truncate">Jastip Agent</span>
             </Link>
-            <nav className="hidden items-center gap-5 text-sm font-semibold text-muted md:flex">
-              <Link href="/orders/new" className="hover:text-ocean">
-                Buat Order
+            <nav className="hidden items-center rounded-lg border border-line bg-cloud/80 p-1 text-sm font-bold text-muted md:flex">
+              <Link href="/" className="rounded-md px-3 py-2 hover:bg-white hover:text-ocean">
+                Beranda
               </Link>
-              <Link href="/marketplace" className="hover:text-ocean">
-                Marketplace
+              <Link href="/#cara-kerja" className="rounded-md px-3 py-2 hover:bg-white hover:text-ocean">
+                Cara Kerja
               </Link>
-              <Link href="/reputation" className="hover:text-ocean">
+              <Link href="/reputation" className="rounded-md px-3 py-2 hover:bg-white hover:text-ocean">
                 Reputasi
               </Link>
-              <Link href="/demo" className="hover:text-ocean">
-                Demo Admin
+              <Link href="/login" className="rounded-md px-3 py-2 hover:bg-white hover:text-ocean">
+                Login
               </Link>
             </nav>
             <RoleSwitcher />
