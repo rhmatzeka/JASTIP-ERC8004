@@ -7,7 +7,7 @@ import {
   seedDemoBuyerOrder,
   seedDemoJastiper,
   updateOrder
-} from "@/lib/mockDb";
+} from "@/lib/db";
 import type { VerificationStatus } from "@/lib/types";
 
 export const runtime = "nodejs";

@@ -13,6 +13,7 @@ import type { Country } from "@/lib/types";
 export default function NewOrderPage() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [form, setForm] = useState({
     itemName: "Nike Japan Limited Edition Bag",
     brand: "Nike",
@@ -40,6 +41,7 @@ export default function NewOrderPage() {
 
   async function submit() {
     setLoading(true);
+    setError("");
     const response = await fetch("/api/orders", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -47,6 +49,10 @@ export default function NewOrderPage() {
     });
     const data = await response.json();
     setLoading(false);
+    if (!response.ok) {
+      setError(data.error || "Failed to create order");
+      return;
+    }
     router.push(`/orders/${data.order.id}`);
   }
 
@@ -128,6 +134,7 @@ export default function NewOrderPage() {
             {loading ? <Loader2 className="animate-spin" size={16} /> : <ArrowRight size={16} />}
             Create escrow order
           </button>
+          {error ? <p className="mt-3 rounded-lg bg-rose-50 p-3 text-sm font-semibold text-rose-700">{error}</p> : null}
         </section>
         <EscrowBreakdown breakdown={breakdown} />
       </div>

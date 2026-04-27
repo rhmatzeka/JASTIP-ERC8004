@@ -116,22 +116,50 @@ const reportSchema = {
 
 export function normalizeReport(report: VerificationReportJson, order: Order): VerificationReportJson {
   let status: VerificationStatus = report.overall_status;
+  const confidence = clampScore(report.item.match_confidence);
+  const fraudScore = clampScore(report.fraud_risk.score);
   const flags = [...(report.fraud_risk?.flags || [])];
+  const storeName = report.store.name?.trim() || "";
+  const priceAmountIdr = Math.max(0, Math.round(report.price.amount_idr || 0));
+  const withinBudget = priceAmountIdr <= order.maxBudgetIdr;
 
-  if (!report.store.name) flags.push("Receipt store name is empty");
-  if (report.price.amount_idr > order.maxBudgetIdr * 1.1) flags.push("Price is above budget by more than 10%");
-  if (report.item.match_confidence < 60 || report.fraud_risk.score >= 70) status = "REJECTED";
-  else if (report.item.match_confidence < 85 || report.fraud_risk.score >= 30 || !report.price.within_budget) status = "FLAGGED";
+  if (!storeName) flags.push("Receipt store name is empty");
+  if (!report.date.valid) flags.push("Receipt date is invalid or not visible");
+  if (!withinBudget) flags.push("Receipt total is above buyer max budget");
+  if (priceAmountIdr > order.maxBudgetIdr * 1.1) flags.push("Price is above budget by more than 10%");
+  if (confidence < 60 || fraudScore >= 70) status = "REJECTED";
+  else if (confidence < 85 || fraudScore >= 30 || !withinBudget) status = "FLAGGED";
   else status = "APPROVED";
 
   return {
     ...report,
+    store: {
+      verified: Boolean(report.store.verified && storeName),
+      name: storeName
+    },
+    item: {
+      match_confidence: confidence,
+      notes: report.item.notes?.trim() || "No item analysis notes returned."
+    },
+    price: {
+      amount_idr: priceAmountIdr,
+      within_budget: withinBudget
+    },
+    date: {
+      valid: Boolean(report.date.valid)
+    },
     fraud_risk: {
       ...report.fraud_risk,
+      score: fraudScore,
       flags: Array.from(new Set(flags))
     },
     overall_status: status
   };
+}
+
+function clampScore(value: number) {
+  if (!Number.isFinite(value)) return 0;
+  return Math.max(0, Math.min(100, Math.round(value)));
 }
 
 export async function verifyJastipOrder({
@@ -179,7 +207,7 @@ export async function verifyJastipOrder({
 
     // Responses API supports multimodal image inputs and structured JSON output.
     const response = await client.responses.create({
-      model: "gpt-4o",
+      model: process.env.OPENAI_VERIFICATION_MODEL || "gpt-4o",
       input: [
         {
           role: "user",
@@ -208,7 +236,7 @@ export async function verifyJastipOrder({
     const fallback = makeReportJson("FLAGGED", order);
     fallback.fraud_risk.flags = [
       ...fallback.fraud_risk.flags,
-      `OpenAI verification fallback used: ${error instanceof Error ? error.message : "unknown error"}`
+      "OpenAI verification failed, rule-based fallback report used"
     ];
     return normalizeReport(fallback, order);
   }

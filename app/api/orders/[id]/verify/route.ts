@@ -1,14 +1,21 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ApiError, fail, ok, parseJson } from "@/lib/api";
 import { verifyJastipOrder } from "@/lib/aiVerification";
-import { createVerificationReport, getOrder, updateOrder } from "@/lib/mockDb";
+import { createVerificationReport, getOrder, updateOrder } from "@/lib/db";
+import { verifyOrderSchema } from "@/lib/validation";
 import { markVerifiedOnChain } from "@/lib/web3";
 
 export const runtime = "nodejs";
 
-export async function POST(request: NextRequest, { params }: { params: { id: string } }) {
-  const body = await request.json();
-  const order = await getOrder(params.id);
-  if (!order) return NextResponse.json({ error: "Order not found" }, { status: 404 });
+export async function POST(request: NextRequest, { params }: { params: Promise<{ id: string }> }) {
+  try {
+  const { id } = await params;
+  const body = await parseJson(request, verifyOrderSchema);
+  const order = await getOrder(id);
+  if (!order) throw new ApiError(404, "Order not found");
+  if (order.status !== "ACCEPTED" && order.status !== "VERIFIED") {
+    throw new ApiError(409, "Order must be accepted before verification");
+  }
 
   const rawJson = await verifyJastipOrder({
     order,
@@ -48,5 +55,8 @@ export async function POST(request: NextRequest, { params }: { params: { id: str
     }
   });
 
-  return NextResponse.json({ order: updated, report });
+  return ok({ order: updated, report });
+  } catch (error) {
+    return fail(error);
+  }
 }

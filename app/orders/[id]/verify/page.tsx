@@ -9,6 +9,7 @@ export default function VerifyOrderPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
   const [photos, setPhotos] = useState({
     receiptPhotoUrl: "",
     itemPhotoUrl: "",
@@ -17,12 +18,18 @@ export default function VerifyOrderPage() {
 
   async function submit() {
     setLoading(true);
-    await fetch(`/api/orders/${params.id}/verify`, {
+    setError("");
+    const response = await fetch(`/api/orders/${params.id}/verify`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(photos)
     });
+    const data = await response.json();
     setLoading(false);
+    if (!response.ok) {
+      setError(data.error || "Failed to run verification");
+      return;
+    }
     router.push(`/orders/${params.id}`);
   }
 
@@ -56,6 +63,7 @@ export default function VerifyOrderPage() {
           {loading ? <Loader2 className="animate-spin" size={16} /> : <ScanLine size={16} />}
           Run AI Verification
         </button>
+        {error ? <p className="mt-3 rounded-lg bg-rose-50 p-3 text-sm font-semibold text-rose-700">{error}</p> : null}
       </section>
     </main>
   );

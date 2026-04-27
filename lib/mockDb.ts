@@ -17,6 +17,7 @@ type DbShape = {
 };
 
 const DATA_FILE = path.join(process.cwd(), ".jastip-agent-db.json");
+let dbLock: Promise<void> = Promise.resolve();
 
 function emptyDb(): DbShape {
   return {
@@ -40,6 +41,24 @@ async function writeDb(db: DbShape) {
   await fs.writeFile(DATA_FILE, JSON.stringify(db, null, 2), "utf8");
 }
 
+async function mutateDb<T>(mutation: (db: DbShape) => T | Promise<T>) {
+  const previous = dbLock;
+  let release!: () => void;
+  dbLock = new Promise<void>((resolve) => {
+    release = resolve;
+  });
+  await previous;
+
+  try {
+    const db = await readDb();
+    const result = await mutation(db);
+    await writeDb(db);
+    return result;
+  } finally {
+    release();
+  }
+}
+
 function id(prefix: string) {
   return `${prefix}_${crypto.randomUUID()}`;
 }
@@ -56,37 +75,38 @@ export async function getOrder(orderId: string) {
 }
 
 export async function createOrder(input: Omit<Order, "id" | "status" | "createdAt"> & Partial<Pick<Order, "id" | "status" | "createdAt">>) {
-  const db = await readDb();
-  const order: Order = {
-    ...input,
-    id: input.id || id("ord"),
-    status: input.status || "CREATED",
-    createdAt: input.createdAt || new Date().toISOString()
-  };
-  db.orders.unshift(order);
-  await writeDb(db);
-  return order;
+  return mutateDb((db) => {
+    const order: Order = {
+      ...input,
+      id: input.id || id("ord"),
+      status: input.status || "CREATED",
+      createdAt: input.createdAt || new Date().toISOString()
+    };
+    db.orders.unshift(order);
+    return order;
+  });
 }
 
 export async function updateOrder(orderId: string, patch: Partial<Order>) {
-  const db = await readDb();
-  const index = db.orders.findIndex((order) => order.id === orderId);
-  if (index === -1) return null;
-  db.orders[index] = { ...db.orders[index], ...patch };
-  await writeDb(db);
-  return db.orders[index];
+  return mutateDb((db) => {
+    const index = db.orders.findIndex((order) => order.id === orderId);
+    if (index === -1) return null;
+    db.orders[index] = { ...db.orders[index], ...patch };
+    return db.orders[index];
+  });
 }
 
 export async function createVerificationReport(input: Omit<VerificationReport, "id" | "createdAt">) {
-  const db = await readDb();
-  const report: VerificationReport = {
-    ...input,
-    id: id("ver"),
-    createdAt: new Date().toISOString()
-  };
-  db.verificationReports.unshift(report);
-  await writeDb(db);
-  return report;
+  return mutateDb((db) => {
+    const report: VerificationReport = {
+      ...input,
+      id: id("ver"),
+      createdAt: new Date().toISOString()
+    };
+    db.verificationReports = db.verificationReports.filter((existing) => existing.orderId !== input.orderId);
+    db.verificationReports.unshift(report);
+    return report;
+  });
 }
 
 export async function getVerificationReport(reportId?: string) {
@@ -101,53 +121,62 @@ export async function getVerificationReportByOrder(orderId: string) {
 }
 
 export async function registerAgent(walletAddress: string, metadataURI = "ipfs://demo-jastip-agent") {
-  const db = await readDb();
-  const normalized = walletAddress.toLowerCase();
-  const existing = db.reputations.find((rep) => rep.walletAddress.toLowerCase() === normalized);
-  if (existing) return existing;
+  return mutateDb((db) => {
+    const normalized = walletAddress.toLowerCase();
+    const existing = db.reputations.find((rep) => rep.walletAddress.toLowerCase() === normalized);
+    if (existing) return existing;
 
-  const reputation: AgentReputation = {
-    id: id("rep"),
-    walletAddress,
-    agentId: `erc8004-sepolia-${walletAddress.slice(2, 10).toLowerCase()}`,
-    metadataURI,
-    completedOrders: 0,
-    disputedOrders: 0,
-    averageVerificationScore: 0,
-    trustScore: 0
-  };
-  db.reputations.unshift(reputation);
-  await writeDb(db);
-  return reputation;
+    const reputation: AgentReputation = {
+      id: id("rep"),
+      walletAddress,
+      agentId: `erc8004-sepolia-${walletAddress.slice(2, 10).toLowerCase()}`,
+      metadataURI,
+      completedOrders: 0,
+      disputedOrders: 0,
+      averageVerificationScore: 0,
+      trustScore: 0
+    };
+    db.reputations.unshift(reputation);
+    return reputation;
+  });
 }
 
 export async function updateReputation(walletAddress: string, completed: boolean, verificationScore: number) {
-  const db = await readDb();
-  const normalized = walletAddress.toLowerCase();
-  let reputation = db.reputations.find((rep) => rep.walletAddress.toLowerCase() === normalized);
-  if (!reputation) {
-    reputation = await registerAgent(walletAddress);
-    return updateReputation(walletAddress, completed, verificationScore);
-  }
+  return mutateDb((db) => {
+    const normalized = walletAddress.toLowerCase();
+    let reputation = db.reputations.find((rep) => rep.walletAddress.toLowerCase() === normalized);
+    if (!reputation) {
+      reputation = {
+        id: id("rep"),
+        walletAddress,
+        agentId: `erc8004-sepolia-${walletAddress.slice(2, 10).toLowerCase()}`,
+        metadataURI: "ipfs://jastip-agent/jastiper-profile",
+        completedOrders: 0,
+        disputedOrders: 0,
+        averageVerificationScore: 0,
+        trustScore: 0
+      };
+      db.reputations.unshift(reputation);
+    }
 
-  if (completed) {
-    const previousCompleted = reputation.completedOrders;
-    reputation.completedOrders += 1;
-    reputation.averageVerificationScore = Math.round(
-      (reputation.averageVerificationScore * previousCompleted + verificationScore) / reputation.completedOrders
+    if (completed) {
+      const previousCompleted = reputation.completedOrders;
+      reputation.completedOrders += 1;
+      reputation.averageVerificationScore = Math.round(
+        (reputation.averageVerificationScore * previousCompleted + verificationScore) / reputation.completedOrders
+      );
+    } else {
+      reputation.disputedOrders += 1;
+    }
+    reputation.trustScore = calculateTrustScore(
+      reputation.completedOrders,
+      reputation.averageVerificationScore,
+      reputation.disputedOrders
     );
-  } else {
-    reputation.disputedOrders += 1;
-  }
-  reputation.trustScore = calculateTrustScore(
-    reputation.completedOrders,
-    reputation.averageVerificationScore,
-    reputation.disputedOrders
-  );
 
-  db.reputations = db.reputations.map((rep) => (rep.walletAddress.toLowerCase() === normalized ? reputation : rep));
-  await writeDb(db);
-  return reputation;
+    db.reputations = db.reputations.map((rep) => (rep.walletAddress.toLowerCase() === normalized ? reputation : rep));
+    return reputation;
+  });
 }
 
 export async function getReputation(walletAddress: string) {
@@ -162,7 +191,12 @@ export async function getReputations() {
 }
 
 export async function resetDemoData() {
-  await writeDb(emptyDb());
+  await mutateDb((db) => {
+    db.users = [];
+    db.orders = [];
+    db.verificationReports = [];
+    db.reputations = [];
+  });
 }
 
 export async function seedDemoJastiper() {

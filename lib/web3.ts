@@ -15,6 +15,7 @@ const REGISTRY_ABI = [
 ];
 
 function getSigner() {
+  if (process.env.ENABLE_SERVER_CHAIN_WRITES !== "true") return null;
   const rpcUrl = process.env.NEXT_PUBLIC_SEPOLIA_RPC_URL;
   const privateKey = process.env.PRIVATE_KEY;
   if (!rpcUrl || !privateKey) return null;
@@ -103,6 +104,7 @@ export async function disputeEscrowOnChain(chainOrderId?: string) {
 export async function registerAgentOnChain(walletAddress: string, metadataURI: string) {
   const signer = getSigner();
   const address = process.env.NEXT_PUBLIC_AGENT_REGISTRY_CONTRACT_ADDRESS;
+  if (!ethers.isAddress(walletAddress)) throw new Error("Invalid agent wallet address");
   if (!signer || !address) return mockHash("agent-register");
   const contract = new ethers.Contract(address, REGISTRY_ABI, signer);
   const tx = await contract.registerAgent(walletAddress, metadataURI);
@@ -113,6 +115,7 @@ export async function registerAgentOnChain(walletAddress: string, metadataURI: s
 export async function updateAgentReputationOnChain(walletAddress: string, completed: boolean, verificationScore: number) {
   const signer = getSigner();
   const address = process.env.NEXT_PUBLIC_AGENT_REGISTRY_CONTRACT_ADDRESS;
+  if (!ethers.isAddress(walletAddress)) throw new Error("Invalid agent wallet address");
   if (!signer || !address) return mockHash("agent-reputation");
   const contract = new ethers.Contract(address, REGISTRY_ABI, signer);
   const tx = await contract.updateReputation(walletAddress, completed, verificationScore);

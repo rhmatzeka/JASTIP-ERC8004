@@ -35,7 +35,7 @@ This MVP adds:
 
 ## Tech Stack
 
-- Next.js 14
+- Next.js 16
 - TypeScript
 - Tailwind CSS
 - Next.js API routes
@@ -128,6 +128,7 @@ OPENAI_API_KEY=
 NEXT_PUBLIC_PRIVY_APP_ID=
 NEXT_PUBLIC_SEPOLIA_RPC_URL=
 PRIVATE_KEY=
+ENABLE_SERVER_CHAIN_WRITES=false
 NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS=
 NEXT_PUBLIC_AGENT_REGISTRY_CONTRACT_ADDRESS=
 PLATFORM_TREASURY_ADDRESS=0xA6E0000000000000000000000000000000008004
@@ -144,11 +145,27 @@ Important values:
 - `OPENAI_API_KEY`: enables real GPT-4o Vision verification
 - `NEXT_PUBLIC_SEPOLIA_RPC_URL`: Sepolia RPC endpoint
 - `PRIVATE_KEY`: deployer/operator private key
+- `ENABLE_SERVER_CHAIN_WRITES`: set to `true` only when you intentionally want API routes to submit Sepolia writes with `PRIVATE_KEY`
 - `PLATFORM_TREASURY_ADDRESS`: receives the 3% platform fee
 - `NEXT_PUBLIC_ESCROW_CONTRACT_ADDRESS`: deployed `JastipEscrow`
 - `NEXT_PUBLIC_AGENT_REGISTRY_CONTRACT_ADDRESS`: deployed `JastipAgentRegistry`
 
 Never commit `.env.local`.
+
+## Production Hardening Included
+
+This version is stricter than a pure demo scaffold:
+
+- API payloads are validated with `zod`
+- EVM wallet addresses are checked before write actions
+- Invalid order state transitions are rejected
+- Verification cannot run before a jastiper accepts an order
+- Funds cannot be released before verification
+- Rejected AI reports cannot be released
+- Local JSON fallback uses serialized writes to reduce demo-time race bugs
+- AI output is clamped and normalized before saving
+- Backend fraud rules override uncertain model output
+- Server-side Sepolia writes are disabled by default to avoid accidentally using one backend wallet for buyer and jastiper roles
 
 ## AI Verification
 
@@ -261,6 +278,7 @@ Add this to `.env.local`:
 ```text
 NEXT_PUBLIC_SEPOLIA_RPC_URL=https://...
 PRIVATE_KEY=0x...
+ENABLE_SERVER_CHAIN_WRITES=true
 PLATFORM_TREASURY_ADDRESS=0x...
 ```
 
@@ -284,6 +302,14 @@ NEXT_PUBLIC_AGENT_REGISTRY_CONTRACT_ADDRESS=0x...
 ```
 
 Restart the app after changing env values.
+
+For a production wallet flow, keep role-sensitive escrow actions in the user's connected wallet:
+
+- buyer signs `createOrder`
+- jastiper signs `acceptOrder`
+- buyer signs `releaseFunds` or `openDispute`
+
+The backend/operator wallet should mainly handle controlled actions such as reputation updates or admin automation. This repo keeps mock fallback on by default so local demos cannot accidentally submit wrong-role transactions from a single server private key.
 
 ## API Routes
 
@@ -364,6 +390,22 @@ npm run dev
 npm run build
 npm run compile
 npm run deploy:sepolia
+```
+
+## Supabase Schema
+
+The local MVP stores data in `.jastip-agent-db.json`. For hosted persistence, run:
+
+```text
+supabase/schema.sql
+```
+
+in the Supabase SQL editor, then fill:
+
+```text
+SUPABASE_URL=
+SUPABASE_ANON_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 ```
 
 ## Current MVP Status

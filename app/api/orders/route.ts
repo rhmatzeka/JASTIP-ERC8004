@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
+import { ApiError, fail, ok, parseJson } from "@/lib/api";
 import { PLATFORM_FEE_PERCENT } from "@/lib/constants";
 import { calculateEscrowAmount } from "@/lib/escrowMath";
-import { createOrder, getOrders } from "@/lib/mockDb";
+import { createOrder, getOrders } from "@/lib/db";
 import type { Country, OrderStatus } from "@/lib/types";
+import { createOrderSchema } from "@/lib/validation";
 import { createEscrowOnChain } from "@/lib/web3";
 
 export const runtime = "nodejs";
@@ -10,11 +12,12 @@ export const runtime = "nodejs";
 export async function GET(request: NextRequest) {
   const status = request.nextUrl.searchParams.get("status") as OrderStatus | null;
   const orders = await getOrders(status || undefined);
-  return NextResponse.json({ orders });
+  return ok({ orders });
 }
 
 export async function POST(request: NextRequest) {
-  const body = await request.json();
+  try {
+  const body = await parseJson(request, createOrderSchema);
   const destinationCountry = body.destinationCountry as Country;
   const breakdown = calculateEscrowAmount({
     destinationCountry,
@@ -22,6 +25,10 @@ export async function POST(request: NextRequest) {
     serviceFeePercent: Number(body.serviceFeePercent || 0)
   });
   const chain = await createEscrowOnChain(breakdown.escrowAmount);
+
+  if (body.maxBudgetIdr < breakdown.estimatedIdrPrice) {
+    throw new ApiError(400, "Max budget must be at least the converted estimated item price");
+  }
 
   const order = await createOrder({
     chainOrderId: chain.chainOrderId,
@@ -46,5 +53,8 @@ export async function POST(request: NextRequest) {
     }
   });
 
-  return NextResponse.json({ order });
+  return ok({ order });
+  } catch (error) {
+    return fail(error);
+  }
 }

@@ -20,6 +20,7 @@ export default function OrderDetailPage() {
   const [report, setReport] = useState<VerificationReportType | null>(null);
   const [wallet, setWallet] = useState(DEMO_JASTIPER_WALLET);
   const [loading, setLoading] = useState("");
+  const [error, setError] = useState("");
 
   async function load() {
     const response = await fetch(`/api/orders/${params.id}`);
@@ -39,26 +40,44 @@ export default function OrderDetailPage() {
 
   async function accept() {
     setLoading("accept");
-    await fetch(`/api/orders/${params.id}/accept`, {
+    setError("");
+    const response = await fetch(`/api/orders/${params.id}/accept`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ jastiperWallet: wallet })
     });
+    const data = await response.json();
     setLoading("");
+    if (!response.ok) {
+      setError(data.error || "Failed to accept order");
+      return;
+    }
     await load();
   }
 
   async function release() {
     setLoading("release");
-    await fetch(`/api/orders/${params.id}/release`, { method: "POST" });
+    setError("");
+    const response = await fetch(`/api/orders/${params.id}/release`, { method: "POST" });
+    const data = await response.json();
     setLoading("");
+    if (!response.ok) {
+      setError(data.error || "Failed to release funds");
+      return;
+    }
     await load();
   }
 
   async function dispute() {
     setLoading("dispute");
-    await fetch(`/api/orders/${params.id}/dispute`, { method: "POST" });
+    setError("");
+    const response = await fetch(`/api/orders/${params.id}/dispute`, { method: "POST" });
+    const data = await response.json();
     setLoading("");
+    if (!response.ok) {
+      setError(data.error || "Failed to open dispute");
+      return;
+    }
     await load();
   }
 
@@ -105,6 +124,7 @@ export default function OrderDetailPage() {
           ))}
         </div>
       </section>
+      {error ? <p className="mb-6 rounded-lg bg-rose-50 p-3 text-sm font-semibold text-rose-700">{error}</p> : null}
 
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <div className="space-y-6">
