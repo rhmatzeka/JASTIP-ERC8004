@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 import OrderCard from "@/components/OrderCard";
+import { useDemoProfile } from "@/lib/useDemoProfile";
 import type { Order } from "@/lib/types";
 
 export default function MarketplacePage() {
+  const { role, profile, setRole } = useDemoProfile();
   const [orders, setOrders] = useState<Order[]>([]);
 
   useEffect(() => {
@@ -21,9 +23,22 @@ export default function MarketplacePage() {
           <h1 className="mt-1 text-3xl font-black text-ink">View Marketplace</h1>
         </div>
         <p className="max-w-xl text-sm leading-6 text-muted">
-          Jastipers can accept buyer-funded orders, attach their ERC-8004-style identity, and complete proof upload after purchase.
+          {role === "JASTIPER"
+            ? "You are browsing as a jastiper. Accept buyer-funded orders, upload proof, and build reputation."
+            : "Marketplace is the jastiper workspace. Switch role before accepting buyer orders."}
         </p>
       </div>
+      {role !== "JASTIPER" ? (
+        <section className="panel mb-6 p-5">
+          <p className="font-bold text-ink">Halaman ini untuk Jastiper.</p>
+          <p className="mt-2 text-sm text-muted">
+            Kamu sedang memakai mode {profile.label}. Buyer bisa lihat order, tapi hanya jastiper yang bisa accept.
+          </p>
+          <button className="btn-primary mt-4" onClick={() => setRole("JASTIPER")}>
+            Switch to Jastiper
+          </button>
+        </section>
+      ) : null}
       {orders.length === 0 ? (
         <div className="panel p-8 text-center">
           <p className="font-bold text-ink">No orders yet.</p>

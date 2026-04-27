@@ -22,9 +22,17 @@ This MVP adds:
 
 ## Product Flow
 
+The app has three explicit modes in the header:
+
+- `Buyer`: creates jastip orders, reviews AI reports, releases funds, or opens disputes
+- `Jastiper`: accepts open marketplace orders and uploads purchase proof
+- `Admin`: seeds demo data and generates judge-ready reports
+
+Flow:
+
 1. Buyer creates a jastip order.
 2. Buyer funds escrow.
-3. Jastiper accepts the order.
+3. Jastiper accepts the order from Marketplace.
 4. Jastiper buys the item.
 5. Jastiper uploads receipt photo and product photo.
 6. AI verifies receipt, item match, price, date, and fraud risk.
@@ -330,16 +338,17 @@ POST /api/demo
 
 Fastest judge flow:
 
-1. Open `/demo`.
-2. Click `Seed demo buyer order`.
-3. Click `Seed demo jastiper`.
-4. Open `/marketplace`.
-5. Select the Nike Japan order.
-6. Accept the order as jastiper.
-7. Upload receipt and item photos, or use `/demo` to generate a mock approved AI report.
-8. Review `Laporan Verifikasi AI`.
-9. Click `Lepas Dana`.
-10. Open `/reputation` and show the jastiper's trust score increase.
+1. Open `/` and choose `Masuk sebagai Admin`.
+2. Open `/demo`.
+3. Click `Seed demo buyer order`.
+4. Click `Seed demo jastiper`.
+5. Switch role to `Jastiper`.
+6. Open `/marketplace`.
+7. Select the Nike Japan order and click `Accept Order`.
+8. Switch role to `Admin` and generate a mock approved AI report, or stay as Jastiper and upload real proof photos.
+9. Switch role to `Buyer`.
+10. Open the order, review `Laporan Verifikasi AI`, then click `Lepas Dana`.
+11. Open `/reputation` and show the jastiper's trust score increase.
 
 Recommended demo URL:
 

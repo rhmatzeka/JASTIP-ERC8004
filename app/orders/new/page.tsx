@@ -1,17 +1,18 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter } from "next/navigation";
 import { ArrowRight, Loader2 } from "lucide-react";
 import EscrowBreakdown from "@/components/EscrowBreakdown";
 import UploadBox from "@/components/UploadBox";
 import WalletConnect from "@/components/WalletConnect";
-import { DEMO_BUYER_WALLET } from "@/lib/constants";
 import { calculateEscrowAmount } from "@/lib/escrowMath";
+import { useDemoProfile } from "@/lib/useDemoProfile";
 import type { Country } from "@/lib/types";
 
 export default function NewOrderPage() {
   const router = useRouter();
+  const { role, profile, setRole } = useDemoProfile();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [form, setForm] = useState({
@@ -25,9 +26,13 @@ export default function NewOrderPage() {
     estimatedLocalPrice: 7000,
     maxBudgetIdr: 950000,
     serviceFeePercent: 12,
-    buyerWallet: DEMO_BUYER_WALLET,
+    buyerWallet: profile.walletAddress,
     referencePhotoUrl: ""
   });
+
+  useEffect(() => {
+    setForm((current) => ({ ...current, buyerWallet: profile.walletAddress }));
+  }, [profile.walletAddress]);
 
   const breakdown = useMemo(
     () =>
@@ -62,6 +67,17 @@ export default function NewOrderPage() {
         <p className="text-sm font-bold text-ocean">Titip Barang</p>
         <h1 className="mt-1 text-3xl font-black text-ink">Buat Order</h1>
       </div>
+      {role !== "BUYER" ? (
+        <section className="panel mb-6 p-5">
+          <p className="font-bold text-ink">Halaman ini untuk Buyer.</p>
+          <p className="mt-2 text-sm text-muted">
+            Kamu sedang memakai mode {profile.label}. Pindah ke Buyer untuk membuat order jastip sebagai customer.
+          </p>
+          <button className="btn-primary mt-4" onClick={() => setRole("BUYER")}>
+            Switch to Buyer
+          </button>
+        </section>
+      ) : null}
       <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
         <section className="panel p-5">
           <div className="grid gap-4 md:grid-cols-2">

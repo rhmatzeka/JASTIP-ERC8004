@@ -1,20 +1,35 @@
 "use client";
 
 import { useParams, useRouter } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Loader2, ScanLine } from "lucide-react";
 import UploadBox from "@/components/UploadBox";
+import { useDemoProfile } from "@/lib/useDemoProfile";
+import type { Order } from "@/lib/types";
 
 export default function VerifyOrderPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
+  const { role, profile, setRole } = useDemoProfile();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [order, setOrder] = useState<Order | null>(null);
   const [photos, setPhotos] = useState({
     receiptPhotoUrl: "",
     itemPhotoUrl: "",
     additionalItemPhotoUrl: ""
   });
+
+  useEffect(() => {
+    fetch(`/api/orders/${params.id}`)
+      .then((response) => response.json())
+      .then((data) => setOrder(data.order || null));
+  }, [params.id]);
+
+  const canUpload =
+    role === "JASTIPER" &&
+    order?.jastiperWallet?.toLowerCase() === profile.walletAddress.toLowerCase() &&
+    (order.status === "ACCEPTED" || order.status === "VERIFIED");
 
   async function submit() {
     setLoading(true);
@@ -39,6 +54,17 @@ export default function VerifyOrderPage() {
         <p className="text-sm font-bold text-ocean">AI receipt and item check</p>
         <h1 className="mt-1 text-3xl font-black text-ink">Upload Bukti Pembelian</h1>
       </div>
+      {!canUpload ? (
+        <section className="panel mb-6 p-5">
+          <p className="font-bold text-ink">Halaman ini untuk Jastiper yang menerima order.</p>
+          <p className="mt-2 text-sm text-muted">
+            Kamu sedang memakai mode {profile.label}. Pindah ke Jastiper yang assigned ke order ini untuk upload bukti.
+          </p>
+          <button className="btn-primary mt-4" onClick={() => setRole("JASTIPER")}>
+            Switch to Jastiper
+          </button>
+        </section>
+      ) : null}
       <section className="panel p-5">
         <div className="grid gap-4 md:grid-cols-2">
           <UploadBox
@@ -59,7 +85,7 @@ export default function VerifyOrderPage() {
             />
           </div>
         </div>
-        <button className="btn-primary mt-6" onClick={submit} disabled={loading}>
+        <button className="btn-primary mt-6" onClick={submit} disabled={loading || !canUpload}>
           {loading ? <Loader2 className="animate-spin" size={16} /> : <ScanLine size={16} />}
           Run AI Verification
         </button>

@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { ArrowRight, BadgeDollarSign, Bot, HandCoins, ShieldCheck, Star, Users } from "lucide-react";
+import { ArrowRight, BadgeDollarSign, Bot, ShieldCheck, Star, Users } from "lucide-react";
+import RoleEntryCards from "@/components/RoleEntryCards";
 
 const cards = [
   {
@@ -76,6 +77,10 @@ export default function LandingPage() {
             ))}
           </div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-7xl px-4 py-4">
+        <RoleEntryCards />
       </section>
 
       <section className="mx-auto grid max-w-7xl gap-4 px-4 py-6 md:grid-cols-3">

@@ -1,24 +1,25 @@
 "use client";
 
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import { Check, ExternalLink, Loader2, UploadCloud } from "lucide-react";
 import EscrowBreakdown from "@/components/EscrowBreakdown";
 import StatusBadge from "@/components/StatusBadge";
 import VerificationReport from "@/components/VerificationReport";
 import WalletConnect from "@/components/WalletConnect";
-import { DEMO_JASTIPER_WALLET, ORDER_STEPS } from "@/lib/constants";
+import { ORDER_STEPS } from "@/lib/constants";
 import { formatIdr } from "@/lib/escrowMath";
+import { useDemoProfile } from "@/lib/useDemoProfile";
 import { sepoliaTxUrl } from "@/lib/web3";
 import type { Order, VerificationReport as VerificationReportType } from "@/lib/types";
 
 export default function OrderDetailPage() {
   const params = useParams<{ id: string }>();
-  const router = useRouter();
+  const { role, profile, setRole } = useDemoProfile();
   const [order, setOrder] = useState<Order | null>(null);
   const [report, setReport] = useState<VerificationReportType | null>(null);
-  const [wallet, setWallet] = useState(DEMO_JASTIPER_WALLET);
+  const [wallet, setWallet] = useState(profile.walletAddress);
   const [loading, setLoading] = useState("");
   const [error, setError] = useState("");
 
@@ -32,6 +33,10 @@ export default function OrderDetailPage() {
   useEffect(() => {
     load();
   }, [params.id]);
+
+  useEffect(() => {
+    setWallet(profile.walletAddress);
+  }, [profile.walletAddress]);
 
   const activeStep = useMemo(() => {
     if (!order) return 0;
@@ -89,6 +94,12 @@ export default function OrderDetailPage() {
     );
   }
 
+  const isBuyer = order.buyerWallet.toLowerCase() === profile.walletAddress.toLowerCase();
+  const isAssignedJastiper = order.jastiperWallet?.toLowerCase() === profile.walletAddress.toLowerCase();
+  const canAccept = role === "JASTIPER" && order.status === "CREATED";
+  const canUploadProof = role === "JASTIPER" && isAssignedJastiper && (order.status === "ACCEPTED" || order.status === "VERIFIED");
+  const canDecideFunds = role === "BUYER" && isBuyer && order.status === "VERIFIED";
+
   return (
     <main className="mx-auto max-w-7xl px-4 py-8">
       <div className="mb-6 flex flex-col justify-between gap-4 md:flex-row md:items-start">
@@ -102,10 +113,12 @@ export default function OrderDetailPage() {
             {order.brand} · {order.model} · {order.color} · {order.size}
           </p>
         </div>
-        <Link href={`/orders/${order.id}/verify`} className="btn-secondary">
-          <UploadCloud size={16} />
-          Upload Bukti Pembelian
-        </Link>
+        {canUploadProof ? (
+          <Link href={`/orders/${order.id}/verify`} className="btn-secondary">
+            <UploadCloud size={16} />
+            Upload Bukti Pembelian
+          </Link>
+        ) : null}
       </div>
 
       <section className="panel mb-6 p-5">
@@ -166,19 +179,33 @@ export default function OrderDetailPage() {
 
           {order.status === "CREATED" ? (
             <section className="panel p-5">
-              <h2 className="mb-4 text-xl font-black text-ink">Terima Order</h2>
-              <WalletConnect value={wallet} onChange={setWallet} label="Jastiper wallet address" />
-              <button className="btn-primary mt-4" onClick={accept} disabled={loading === "accept"}>
-                {loading === "accept" ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
-                Accept Order
-              </button>
+              {canAccept ? (
+                <>
+                  <h2 className="mb-4 text-xl font-black text-ink">Terima Order</h2>
+                  <WalletConnect value={wallet} onChange={setWallet} label="Jastiper wallet address" />
+                  <button className="btn-primary mt-4" onClick={accept} disabled={loading === "accept"}>
+                    {loading === "accept" ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
+                    Accept Order
+                  </button>
+                </>
+              ) : (
+                <>
+                  <h2 className="text-xl font-black text-ink">Order masih terbuka</h2>
+                  <p className="mt-2 text-sm text-muted">
+                    Kamu sedang mode {profile.label}. Pindah ke Jastiper untuk menerima order ini.
+                  </p>
+                  <button className="btn-primary mt-4" onClick={() => setRole("JASTIPER")}>
+                    Switch to Jastiper
+                  </button>
+                </>
+              )}
             </section>
           ) : null}
 
           {report ? (
             <>
               <VerificationReport report={report} />
-              {order.status === "VERIFIED" ? (
+              {canDecideFunds ? (
                 <div className="panel flex flex-col gap-3 p-5 sm:flex-row">
                   <button className="btn-primary" onClick={release} disabled={loading === "release"}>
                     {loading === "release" ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
@@ -187,6 +214,18 @@ export default function OrderDetailPage() {
                   <button className="btn-danger" onClick={dispute} disabled={loading === "dispute"}>
                     Buka Sengketa
                   </button>
+                </div>
+              ) : report && order.status === "VERIFIED" ? (
+                <div className="panel p-5">
+                  <p className="font-bold text-ink">Menunggu keputusan Buyer</p>
+                  <p className="mt-2 text-sm text-muted">
+                    Hanya wallet buyer order ini yang bisa melepas dana atau membuka sengketa.
+                  </p>
+                  {!isBuyer ? (
+                    <button className="btn-secondary mt-4" onClick={() => setRole("BUYER")}>
+                      Switch to Buyer
+                    </button>
+                  ) : null}
                 </div>
               ) : null}
             </>
