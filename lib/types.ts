@@ -1,4 +1,4 @@
-export type UserRole = "BUYER" | "JASTIPER";
+export type UserRole = "BUYER" | "JASTIPER" | "ADMIN";
 
 export type OrderStatus =
   | "CREATED"

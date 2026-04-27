@@ -87,6 +87,35 @@ export async function createOrder(input: Omit<Order, "id" | "status" | "createdA
   });
 }
 
+export async function upsertUser(input: Pick<User, "role" | "name" | "walletAddress">) {
+  return mutateDb((db) => {
+    const normalized = input.walletAddress.toLowerCase();
+    const existing = db.users.find((user) => user.walletAddress.toLowerCase() === normalized);
+    if (existing) {
+      existing.role = input.role;
+      existing.name = input.name;
+      existing.walletAddress = input.walletAddress;
+      return existing;
+    }
+
+    const user: User = {
+      id: id("usr"),
+      role: input.role,
+      name: input.name,
+      walletAddress: input.walletAddress,
+      createdAt: new Date().toISOString()
+    };
+    db.users.unshift(user);
+    return user;
+  });
+}
+
+export async function getUserByWallet(walletAddress: string) {
+  const db = await readDb();
+  const normalized = walletAddress.toLowerCase();
+  return db.users.find((user) => user.walletAddress.toLowerCase() === normalized) || null;
+}
+
 export async function updateOrder(orderId: string, patch: Partial<Order>) {
   return mutateDb((db) => {
     const index = db.orders.findIndex((order) => order.id === orderId);

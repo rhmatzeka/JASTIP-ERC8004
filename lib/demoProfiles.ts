@@ -11,8 +11,8 @@ export type DemoProfile = {
 export const DEMO_PROFILES: Record<AppRole, DemoProfile> = {
   BUYER: {
     role: "BUYER",
-    label: "Buyer",
-    name: "Nadia Buyer",
+    label: "Customer",
+    name: "Nadia Customer",
     walletAddress: "0xB0B0000000000000000000000000000000001001",
     description: "Create jastip orders, review AI reports, release funds, or open disputes."
   },

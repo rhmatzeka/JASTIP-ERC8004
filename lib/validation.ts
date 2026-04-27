@@ -42,3 +42,9 @@ export const registerAgentSchema = z.object({
   wallet: walletSchema.optional(),
   metadataURI: z.string().trim().min(3).max(300).optional()
 });
+
+export const loginSchema = z.object({
+  role: z.enum(["BUYER", "JASTIPER", "ADMIN"]),
+  name: z.string().trim().min(2).max(80),
+  walletAddress: walletSchema
+});

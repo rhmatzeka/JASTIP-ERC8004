@@ -5,6 +5,7 @@ import {
   getOrders as getLocalOrders,
   getReputation as getLocalReputation,
   getReputations as getLocalReputations,
+  getUserByWallet as getLocalUserByWallet,
   getVerificationReport as getLocalVerificationReport,
   getVerificationReportByOrder as getLocalVerificationReportByOrder,
   makeReportJson,
@@ -13,12 +14,13 @@ import {
   seedDemoBuyerOrder as seedLocalDemoBuyerOrder,
   seedDemoJastiper as seedLocalDemoJastiper,
   updateOrder as updateLocalOrder,
+  upsertUser as upsertLocalUser,
   updateReputation as updateLocalReputation
 } from "./mockDb";
 import { DEMO_BUYER_WALLET, DEMO_JASTIPER_WALLET, MOCK_REFERENCE_PHOTO, PLATFORM_FEE_PERCENT } from "./constants";
 import { calculateEscrowAmount, calculateTrustScore } from "./escrowMath";
 import { getSupabaseServerClient, isSupabaseConfigured } from "./supabase";
-import type { AgentReputation, Country, Order, OrderStatus, VerificationReport } from "./types";
+import type { AgentReputation, Country, Order, OrderStatus, User, VerificationReport } from "./types";
 
 export { makeReportJson };
 
@@ -189,6 +191,26 @@ function reputationToRow(reputation: AgentReputation) {
   };
 }
 
+function userFromRow(row: Record<string, unknown>): User {
+  return {
+    id: String(row.id),
+    role: row.role as User["role"],
+    name: String(row.name),
+    walletAddress: String(row.wallet_address),
+    createdAt: String(row.created_at)
+  };
+}
+
+function userToRow(user: User) {
+  return {
+    id: user.id,
+    role: user.role,
+    name: user.name,
+    wallet_address: user.walletAddress,
+    created_at: user.createdAt
+  };
+}
+
 function optionalString(value: unknown) {
   return typeof value === "string" && value.length > 0 ? value : undefined;
 }
@@ -223,6 +245,35 @@ export async function createOrder(input: Omit<Order, "id" | "status" | "createdA
   const { data, error } = await supabase.from("orders").insert(orderToRow(order)).select("*").single();
   if (error) throw error;
   return orderFromRow(data);
+}
+
+export async function upsertUser(input: Pick<User, "role" | "name" | "walletAddress">) {
+  if (!useSupabase()) return upsertLocalUser(input);
+  const existing = await getUserByWallet(input.walletAddress);
+  const user: User = {
+    id: existing?.id || crypto.randomUUID(),
+    role: input.role,
+    name: input.name,
+    walletAddress: input.walletAddress,
+    createdAt: existing?.createdAt || new Date().toISOString()
+  };
+
+  const supabase = mustSupabase();
+  const { data, error } = await supabase
+    .from("users")
+    .upsert(userToRow(user), { onConflict: "wallet_address" })
+    .select("*")
+    .single();
+  if (error) throw error;
+  return userFromRow(data);
+}
+
+export async function getUserByWallet(walletAddress: string) {
+  if (!useSupabase()) return getLocalUserByWallet(walletAddress);
+  const supabase = mustSupabase();
+  const { data, error } = await supabase.from("users").select("*").ilike("wallet_address", walletAddress).maybeSingle();
+  if (error) throw error;
+  return data ? userFromRow(data) : null;
 }
 
 export async function updateOrder(orderId: string, patch: Partial<Order>) {

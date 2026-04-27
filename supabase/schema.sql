@@ -3,7 +3,7 @@
 
 create table if not exists public.users (
   id uuid primary key default gen_random_uuid(),
-  role text not null check (role in ('BUYER', 'JASTIPER')),
+  role text not null check (role in ('BUYER', 'JASTIPER', 'ADMIN')),
   name text not null,
   wallet_address text not null unique,
   created_at timestamptz not null default now()
