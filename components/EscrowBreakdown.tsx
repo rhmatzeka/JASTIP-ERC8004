@@ -13,16 +13,16 @@ export default function EscrowBreakdown({ breakdown }: { breakdown: EscrowBreakd
     <div className="panel p-5">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div>
-          <p className="text-sm font-semibold text-muted">Dana Aman di Escrow</p>
-          <h3 className="mt-1 text-2xl font-bold text-ink">{formatIdr(breakdown.escrowAmount)}</h3>
+          <p className="eyebrow">Dana aman di escrow</p>
+          <h3 className="mt-2 text-2xl font-black text-ink">{formatIdr(breakdown.escrowAmount)}</h3>
         </div>
-        <span className="rounded-full bg-mint/10 px-3 py-1 text-xs font-bold text-emerald-700">3% revenue</span>
+        <span className="rounded-full border border-emerald-200 bg-mint/10 px-3 py-1 text-xs font-black text-emerald-700">3% fee</span>
       </div>
       <div className="space-y-2 text-sm">
         {rows.map(([label, value]) => (
-          <div key={label} className="flex items-center justify-between gap-4 border-t border-line pt-2">
+          <div key={label} className="flex items-center justify-between gap-4 border-t border-line pt-3">
             <span className="text-muted">{label}</span>
-            <span className="font-semibold text-ink">{formatIdr(Number(value))}</span>
+            <span className="font-black text-ink">{formatIdr(Number(value))}</span>
           </div>
         ))}
       </div>

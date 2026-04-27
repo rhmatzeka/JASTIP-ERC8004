@@ -21,7 +21,7 @@ export default function WalletConnect({
 }) {
   return (
     <div>
-      <label className="text-sm font-bold text-ink">{label}</label>
+      <label className="text-sm font-black text-ink">{label}</label>
       <div className="mt-1 flex gap-2">
         <input className="input" value={value} onChange={(event) => onChange(event.target.value)} placeholder="0x..." />
         <button type="button" className="btn-secondary shrink-0" onClick={() => onChange(randomWallet())}>
@@ -29,7 +29,7 @@ export default function WalletConnect({
           Mock
         </button>
       </div>
-      <p className="mt-1 text-xs text-muted">Uses Privy when configured; otherwise demo wallets keep the flow moving.</p>
+      <p className="mt-2 text-xs leading-5 text-muted">Uses Privy when configured; otherwise demo wallets keep the flow moving.</p>
     </div>
   );
 }

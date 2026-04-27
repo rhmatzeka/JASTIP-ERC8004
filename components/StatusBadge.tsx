@@ -14,7 +14,9 @@ const statusStyle: Record<string, string> = {
 
 export default function StatusBadge({ status }: { status: OrderStatus | VerificationStatus | string }) {
   return (
-    <span className={`inline-flex rounded-full border px-2.5 py-1 text-xs font-bold ${statusStyle[status] || statusStyle.CREATED}`}>
+    <span
+      className={`inline-flex shrink-0 rounded-full border px-2.5 py-1 text-xs font-black tracking-[0.08em] ${statusStyle[status] || statusStyle.CREATED}`}
+    >
       {status}
     </span>
   );

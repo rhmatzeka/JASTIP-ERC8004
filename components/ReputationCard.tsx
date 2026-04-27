@@ -15,30 +15,30 @@ export default function ReputationCard({ reputation }: { reputation: AgentReputa
     <article className="panel p-5">
       <div className="mb-4 flex items-start justify-between gap-4">
         <div className="min-w-0">
-          <p className="truncate text-sm font-semibold text-muted">{reputation.walletAddress}</p>
-          <h3 className="mt-1 text-lg font-bold text-ink">{reputation.agentId}</h3>
+          <p className="truncate text-sm font-bold text-muted">{reputation.walletAddress}</p>
+          <h3 className="mt-1 text-lg font-black text-ink">{reputation.agentId}</h3>
         </div>
-        <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-bold ${current.style}`}>
+        <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-black ${current.style}`}>
           <Icon size={14} />
           {current.label}
         </span>
       </div>
       <div className="grid grid-cols-2 gap-3 text-sm md:grid-cols-4">
-        <div className="rounded-lg bg-cloud p-3">
+        <div className="metric-tile">
           <p className="text-muted">Completed</p>
-          <p className="mt-1 text-xl font-bold text-ink">{reputation.completedOrders}</p>
+          <p className="mt-1 text-xl font-black text-ink">{reputation.completedOrders}</p>
         </div>
-        <div className="rounded-lg bg-cloud p-3">
+        <div className="metric-tile">
           <p className="text-muted">Disputed</p>
-          <p className="mt-1 text-xl font-bold text-ink">{reputation.disputedOrders}</p>
+          <p className="mt-1 text-xl font-black text-ink">{reputation.disputedOrders}</p>
         </div>
-        <div className="rounded-lg bg-cloud p-3">
+        <div className="metric-tile">
           <p className="text-muted">Avg score</p>
-          <p className="mt-1 text-xl font-bold text-ink">{reputation.averageVerificationScore}</p>
+          <p className="mt-1 text-xl font-black text-ink">{reputation.averageVerificationScore}</p>
         </div>
-        <div className="rounded-lg bg-cloud p-3">
+        <div className="metric-tile">
           <p className="text-muted">Trust score</p>
-          <p className="mt-1 text-xl font-bold text-ink">{reputation.trustScore}</p>
+          <p className="mt-1 text-xl font-black text-ink">{reputation.trustScore}</p>
         </div>
       </div>
     </article>
