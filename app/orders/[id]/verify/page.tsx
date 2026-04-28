@@ -53,14 +53,14 @@ export default function VerifyOrderPage() {
   }
 
   return (
-    <main className="mx-auto max-w-4xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6">
+    <main className="mx-auto max-w-4xl px-5 py-10 sm:px-6 lg:px-8">
+      <div className="mb-8">
         <p className="eyebrow">AI receipt and item check</p>
         <h1 className="page-title">Upload Bukti Pembelian</h1>
       </div>
       {!canUpload ? (
         <section className="panel mb-6 p-5">
-          <p className="font-bold text-ink">Halaman ini untuk Jastiper yang menerima order.</p>
+          <p className="font-semibold text-white">Halaman ini untuk Jastiper yang menerima order.</p>
           <p className="mt-2 text-sm text-muted">
             Kamu sedang memakai mode {profile.label}. Pindah ke Jastiper yang assigned ke order ini untuk upload bukti.
           </p>
@@ -93,7 +93,7 @@ export default function VerifyOrderPage() {
           {loading ? <Loader2 className="animate-spin" size={16} /> : <ScanLine size={16} />}
           Run AI Verification
         </button>
-        {error ? <p className="mt-3 rounded-lg bg-rose-50 p-3 text-sm font-semibold text-rose-700">{error}</p> : null}
+        {error ? <p className="mt-3 rounded-xl bg-danger/10 border border-danger/20 p-3 text-sm font-medium text-rose-200">{error}</p> : null}
       </section>
     </main>
   );

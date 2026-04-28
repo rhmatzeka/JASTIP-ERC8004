@@ -15,16 +15,18 @@ export default function ReputationPage() {
 
   return (
     <main className="page-shell">
-      <div className="mb-6">
-        <p className="eyebrow">ERC-8004-style agent registry</p>
-        <h1 className="page-title">Reputasi Jastiper</h1>
-      </div>
-      <div className="grid gap-4">
-        {reputations.length === 0 ? (
-          <div className="panel p-8 text-center text-muted">No registered jastiper agents yet.</div>
-        ) : (
-          reputations.map((reputation) => <ReputationCard key={reputation.walletAddress} reputation={reputation} />)
-        )}
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-8">
+          <p className="eyebrow">ERC-8004-style agent registry</p>
+          <h1 className="page-title">Reputasi Jastiper</h1>
+        </div>
+        <div className="grid gap-3">
+          {reputations.length === 0 ? (
+            <div className="panel p-8 text-center text-sm text-muted">No registered jastiper agents yet.</div>
+          ) : (
+            reputations.map((reputation) => <ReputationCard key={reputation.walletAddress} reputation={reputation} />)
+          )}
+        </div>
       </div>
     </main>
   );

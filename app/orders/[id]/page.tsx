@@ -31,17 +31,9 @@ export default function OrderDetailPage() {
     setReport(data.report || null);
   }
 
-  useEffect(() => {
-    load();
-  }, [params.id]);
-
-  useEffect(() => {
-    if (isReady && !isLoggedIn) router.push("/login");
-  }, [isReady, isLoggedIn, router]);
-
-  useEffect(() => {
-    setWallet(profile.walletAddress);
-  }, [profile.walletAddress]);
+  useEffect(() => { load(); }, [params.id]);
+  useEffect(() => { if (isReady && !isLoggedIn) router.push("/login"); }, [isReady, isLoggedIn, router]);
+  useEffect(() => { setWallet(profile.walletAddress); }, [profile.walletAddress]);
 
   const activeStep = useMemo(() => {
     if (!order) return 0;
@@ -49,45 +41,29 @@ export default function OrderDetailPage() {
   }, [order]);
 
   async function accept() {
-    setLoading("accept");
-    setError("");
+    setLoading("accept"); setError("");
     const response = await fetch(`/api/orders/${params.id}/accept`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
+      method: "POST", headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ jastiperWallet: wallet })
     });
-    const data = await response.json();
-    setLoading("");
-    if (!response.ok) {
-      setError(data.error || "Failed to accept order");
-      return;
-    }
+    const data = await response.json(); setLoading("");
+    if (!response.ok) { setError(data.error || "Failed"); return; }
     await load();
   }
 
   async function release() {
-    setLoading("release");
-    setError("");
+    setLoading("release"); setError("");
     const response = await fetch(`/api/orders/${params.id}/release`, { method: "POST" });
-    const data = await response.json();
-    setLoading("");
-    if (!response.ok) {
-      setError(data.error || "Failed to release funds");
-      return;
-    }
+    const data = await response.json(); setLoading("");
+    if (!response.ok) { setError(data.error || "Failed"); return; }
     await load();
   }
 
   async function dispute() {
-    setLoading("dispute");
-    setError("");
+    setLoading("dispute"); setError("");
     const response = await fetch(`/api/orders/${params.id}/dispute`, { method: "POST" });
-    const data = await response.json();
-    setLoading("");
-    if (!response.ok) {
-      setError(data.error || "Failed to open dispute");
-      return;
-    }
+    const data = await response.json(); setLoading("");
+    if (!response.ok) { setError(data.error || "Failed"); return; }
     await load();
   }
 
@@ -115,7 +91,7 @@ export default function OrderDetailPage() {
           </div>
           <h1 className="page-title">{order.itemName}</h1>
           <p className="mt-2 text-muted">
-            {order.brand} · {order.model} · {order.color} · {order.size}
+            {order.brand} / {order.model} / {order.color} / {order.size}
           </p>
         </div>
         {canUploadProof ? (
@@ -126,28 +102,29 @@ export default function OrderDetailPage() {
         ) : null}
       </div>
 
+      {/* Progress steps */}
       <section className="panel mb-6 p-5">
         <div className="grid gap-3 md:grid-cols-4">
           {ORDER_STEPS.map((step, index) => (
-            <div key={step} className="flex items-center gap-3 rounded-lg bg-cloud p-3">
-              <span
-                className={`grid h-8 w-8 place-items-center rounded-full text-sm font-black ${
-                  index <= activeStep ? "bg-ocean text-white" : "bg-white text-muted"
-                }`}
-              >
-                {index < activeStep || order.status === "RELEASED" ? <Check size={16} /> : index + 1}
+            <div key={step} className="flex items-center gap-3 rounded-xl border border-white/[0.06] bg-white/[0.02] p-3">
+              <span className={`grid h-8 w-8 place-items-center rounded-full text-sm font-semibold ${
+                index <= activeStep ? "bg-accent text-white" : "bg-white/[0.04] text-muted"
+              }`}>
+                {index < activeStep || order.status === "RELEASED" ? <Check size={14} /> : index + 1}
               </span>
-              <span className="text-sm font-bold text-ink">{step}</span>
+              <span className="text-sm font-medium text-white">{step}</span>
             </div>
           ))}
         </div>
       </section>
-      {error ? <p className="mb-6 rounded-lg bg-rose-50 p-3 text-sm font-semibold text-rose-700">{error}</p> : null}
 
-      <div className="grid gap-6 lg:grid-cols-[1fr_380px]">
-        <div className="space-y-6">
+      {error ? <p className="mb-6 rounded-xl bg-danger/10 border border-danger/20 p-3 text-sm font-medium text-rose-200">{error}</p> : null}
+
+      <div className="grid gap-5 lg:grid-cols-[1fr_380px]">
+        <div className="space-y-5">
+          {/* Order details */}
           <section className="panel p-5">
-            <h2 className="mb-4 text-xl font-black text-ink">Order details</h2>
+            <h2 className="mb-4 text-lg font-semibold text-white">Order details</h2>
             <div className="grid gap-3 text-sm md:grid-cols-2">
               {[
                 ["Country", order.destinationCountry],
@@ -158,7 +135,7 @@ export default function OrderDetailPage() {
                 ["Chain order ID", order.chainOrderId || "Mock pending"]
               ].map(([label, value]) => (
                 <div key={label} className="metric-tile">
-                  <p className="font-black text-ink">{label}</p>
+                  <p className="font-medium text-white">{label}</p>
                   <p className="mt-1 break-all text-muted">{value}</p>
                 </div>
               ))}
@@ -168,12 +145,11 @@ export default function OrderDetailPage() {
                 {Object.entries(order.txHashes).map(([label, hash]) => {
                   const url = sepoliaTxUrl(hash);
                   return url ? (
-                    <a key={label} href={url} target="_blank" className="btn-secondary" rel="noreferrer">
-                      {label} tx
-                      <ExternalLink size={14} />
+                    <a key={label} href={url} target="_blank" className="btn-secondary text-xs" rel="noreferrer">
+                      {label} tx <ExternalLink size={12} />
                     </a>
                   ) : (
-                    <span key={label} className="rounded-full bg-cloud px-3 py-1 text-xs font-bold text-muted">
+                    <span key={label} className="rounded-full border border-white/[0.06] bg-white/[0.02] px-3 py-1 text-xs text-muted">
                       {label}: {hash}
                     </span>
                   );
@@ -182,11 +158,12 @@ export default function OrderDetailPage() {
             ) : null}
           </section>
 
+          {/* Accept section */}
           {order.status === "CREATED" ? (
             <section className="panel p-5">
               {canAccept ? (
                 <>
-                  <h2 className="mb-4 text-xl font-black text-ink">Terima Order</h2>
+                  <h2 className="mb-4 text-lg font-semibold text-white">Terima Order</h2>
                   <WalletConnect value={wallet} onChange={setWallet} label="Jastiper wallet address" />
                   <button className="btn-primary mt-4" onClick={accept} disabled={loading === "accept"}>
                     {loading === "accept" ? <Loader2 className="animate-spin" size={16} /> : <Check size={16} />}
@@ -195,18 +172,17 @@ export default function OrderDetailPage() {
                 </>
               ) : (
                 <>
-                  <h2 className="text-xl font-black text-ink">Order masih terbuka</h2>
+                  <h2 className="text-lg font-semibold text-white">Order masih terbuka</h2>
                   <p className="mt-2 text-sm text-muted">
                     Kamu sedang mode {profile.label}. Pindah ke Jastiper untuk menerima order ini.
                   </p>
-                  <button className="btn-primary mt-4" onClick={() => setRole("JASTIPER")}>
-                    Switch to Jastiper
-                  </button>
+                  <button className="btn-primary mt-4" onClick={() => setRole("JASTIPER")}>Switch to Jastiper</button>
                 </>
               )}
             </section>
           ) : null}
 
+          {/* Verification report & fund decisions */}
           {report ? (
             <>
               <VerificationReport report={report} />
@@ -222,14 +198,12 @@ export default function OrderDetailPage() {
                 </div>
               ) : report && order.status === "VERIFIED" ? (
                 <div className="panel p-5">
-                  <p className="font-bold text-ink">Menunggu keputusan Customer</p>
+                  <p className="font-semibold text-white">Menunggu keputusan Customer</p>
                   <p className="mt-2 text-sm text-muted">
                     Hanya wallet customer order ini yang bisa melepas dana atau membuka sengketa.
                   </p>
                   {!isBuyer ? (
-                    <button className="btn-secondary mt-4" onClick={() => setRole("BUYER")}>
-                      Switch to Customer
-                    </button>
+                    <button className="btn-secondary mt-4" onClick={() => setRole("BUYER")}>Switch to Customer</button>
                   ) : null}
                 </div>
               ) : null}
@@ -237,18 +211,19 @@ export default function OrderDetailPage() {
           ) : null}
         </div>
 
-        <div className="space-y-6">
+        {/* Sidebar */}
+        <div className="space-y-5">
           <EscrowBreakdown breakdown={order.escrowBreakdown} />
           <section className="panel p-5">
-            <h2 className="text-xl font-black text-ink">Platform fee split</h2>
-            <div className="mt-4 space-y-3 text-sm">
-              <div className="flex justify-between">
+            <h2 className="text-lg font-semibold text-white">Platform fee split</h2>
+            <div className="mt-4 space-y-0 text-sm">
+              <div className="flex justify-between py-3">
                 <span className="text-muted">Jastiper payout 97%</span>
-                <span className="font-bold text-ink">{formatIdr(order.escrowAmountIdr * 0.97)}</span>
+                <span className="font-medium text-white">{formatIdr(order.escrowAmountIdr * 0.97)}</span>
               </div>
-              <div className="flex justify-between border-t border-line pt-3">
+              <div className="flex justify-between border-t border-white/[0.04] py-3">
                 <span className="text-muted">Treasury fee 3%</span>
-                <span className="font-bold text-ink">{formatIdr(order.escrowAmountIdr * 0.03)}</span>
+                <span className="font-medium text-white">{formatIdr(order.escrowAmountIdr * 0.03)}</span>
               </div>
             </div>
           </section>

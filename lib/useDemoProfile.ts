@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { DEFAULT_ROLE, DEMO_PROFILES, type AppRole } from "./demoProfiles";
+import { signWalletLogin } from "./walletClient";
 
 const LEGACY_ROLE_KEY = "jastip-agent-role";
 const SESSION_KEY = "jastip-agent-session";
@@ -11,6 +12,12 @@ type DemoSession = {
   role: AppRole;
   name: string;
   walletAddress: string;
+};
+
+type LoginOverrides = Partial<Omit<DemoSession, "role">> & {
+  adminCode?: string;
+  message?: string;
+  signature?: string;
 };
 
 function readSession(): DemoSession | null {
@@ -62,12 +69,24 @@ export function useDemoProfile() {
     };
   }, []);
 
-  async function login(nextRole: AppRole, overrides?: Partial<Omit<DemoSession, "role">>) {
-    const profile = DEMO_PROFILES[nextRole];
+  async function login(nextRole: AppRole, overrides?: LoginOverrides) {
+    const walletAddress = overrides?.walletAddress?.trim();
+    if (!walletAddress) {
+      throw new Error("Connect wallet dulu sebelum login.");
+    }
+
+    const signedLogin =
+      overrides?.message && overrides.signature
+        ? { message: overrides.message, signature: overrides.signature }
+        : await signWalletLogin(walletAddress, nextRole);
+
     const requestBody = {
       role: nextRole,
-      name: overrides?.name || profile.name,
-      walletAddress: overrides?.walletAddress || profile.walletAddress
+      name: overrides?.name?.trim() || "Jastip User",
+      walletAddress,
+      message: signedLogin.message,
+      signature: signedLogin.signature,
+      adminCode: overrides?.adminCode
     };
 
     const response = await fetch("/api/auth/login", {
@@ -87,6 +106,7 @@ export function useDemoProfile() {
   }
 
   function logout() {
+    void fetch("/api/auth/logout", { method: "POST" });
     window.localStorage.removeItem(SESSION_KEY);
     window.localStorage.removeItem(LEGACY_ROLE_KEY);
     setSession(null);
@@ -98,7 +118,7 @@ export function useDemoProfile() {
     const profile = DEMO_PROFILES[nextRole];
     return login(nextRole, {
       name: session?.role === nextRole ? session.name : profile.name,
-      walletAddress: session?.role === nextRole ? session.walletAddress : profile.walletAddress
+      walletAddress: session?.walletAddress
     });
   }
 
