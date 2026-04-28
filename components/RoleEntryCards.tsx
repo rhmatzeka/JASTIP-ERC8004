@@ -35,29 +35,35 @@ export default function RoleEntryCards() {
         return (
           <article
             key={profile.role}
-            className={`panel p-5 transition hover:-translate-y-1 hover:shadow-button ${active ? "border-ocean ring-2 ring-ocean/15" : ""}`}
+            className={`panel p-6 flex flex-col justify-between group ${active ? "border-accent/30 bg-accent/[0.04]" : ""}`}
           >
-            <div className="mb-4 flex items-start justify-between gap-3">
-              <span className="grid h-11 w-11 place-items-center rounded-lg bg-ink text-white">
-                <Icon size={20} />
-              </span>
-              {active ? (
-                <span className="rounded-full border border-emerald-200 bg-mint/10 px-3 py-1 text-xs font-black text-emerald-700">
-                  Active
+            <div>
+              <div className="mb-5 flex items-start justify-between gap-3">
+                <span className={`grid h-11 w-11 place-items-center rounded-xl transition-colors ${
+                  active
+                    ? "bg-accent/15 text-accent"
+                    : "bg-white/[0.04] text-muted group-hover:text-white"
+                }`}>
+                  <Icon size={20} />
                 </span>
-              ) : null}
+                {active ? (
+                  <span className="rounded-full bg-success/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wider text-success">
+                    Active
+                  </span>
+                ) : null}
+              </div>
+              <h3 className="text-base font-semibold text-white">{profile.name}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-muted">{profile.description}</p>
             </div>
-            <h3 className="text-lg font-black text-ink">{profile.name}</h3>
-            <p className="mt-2 min-h-12 text-sm leading-6 text-muted">{profile.description}</p>
             <Link
               href={isLoggedIn ? meta.href : `/login?role=${profile.role}`}
-              className="btn-primary mt-5 w-full"
+              className={`${active ? "btn-primary" : "btn-secondary"} mt-5 w-full text-sm`}
               onClick={() => {
                 if (isLoggedIn) void setRole(profile.role);
               }}
             >
               {isLoggedIn ? meta.cta : `Login sebagai ${profile.label}`}
-              <ArrowRight size={16} />
+              <ArrowRight size={15} className="ml-1" />
             </Link>
           </article>
         );

@@ -39,14 +39,14 @@ export default function DemoPage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-4 py-8 sm:px-6 lg:px-8">
-      <div className="mb-6">
+    <main className="mx-auto max-w-5xl px-5 py-10 sm:px-6 lg:px-8">
+      <div className="mb-8">
         <p className="eyebrow">Hackathon-only controls</p>
         <h1 className="page-title">Demo Admin</h1>
       </div>
       {role !== "ADMIN" ? (
         <section className="panel mb-6 p-5">
-          <p className="font-bold text-ink">Halaman ini untuk Admin.</p>
+          <p className="font-semibold text-white">Halaman ini untuk Admin.</p>
           <p className="mt-2 text-sm text-muted">
             Kamu sedang memakai mode {profile.label}. Pindah ke Admin untuk seed data dan generate report demo.
           </p>
@@ -69,7 +69,7 @@ export default function DemoPage() {
             </button>
           ))}
         </div>
-        {message ? <p className="mt-5 rounded-lg bg-cloud p-3 text-sm font-semibold text-ink">{message}</p> : null}
+        {message ? <p className="mt-5 rounded-xl bg-accent/10 border border-accent/20 p-3 text-sm font-medium text-white">{message}</p> : null}
         <div className="mt-5 flex flex-wrap gap-3">
           <Link className="btn-primary" href="/marketplace">
             Open marketplace
@@ -85,7 +85,7 @@ export default function DemoPage() {
         {["Create order", "Accept as jastiper", "Upload proof and release"].map((title, index) => (
           <div key={title} className="panel p-5">
             <p className="eyebrow">0{index + 1}</p>
-            <h2 className="mt-2 text-lg font-bold text-ink">{title}</h2>
+            <h2 className="mt-2 text-base font-semibold text-white">{title}</h2>
             <p className="mt-2 text-sm leading-6 text-muted">
               {index === 0
                 ? "Seed the Nike Japan order or create a custom customer order."
