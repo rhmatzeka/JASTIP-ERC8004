@@ -8,3 +8,4 @@ coverage
 .jastip-agent-db.json
 next-dev*.log
 typechain-types
+public/uploads

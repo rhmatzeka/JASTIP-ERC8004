@@ -188,6 +188,9 @@ export async function verifyJastipOrder({
   }
 
   if (!process.env.OPENAI_API_KEY) {
+    if (process.env.NODE_ENV === "production" && process.env.ALLOW_MOCK_AI !== "true") {
+      throw new Error("OpenAI verification is not configured");
+    }
     return normalizeReport(makeReportJson("APPROVED", order), order);
   }
 

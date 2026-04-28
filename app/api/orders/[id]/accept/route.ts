@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ApiError, fail, ok, parseJson } from "@/lib/api";
+import { requireMatchingWallet, requireSession } from "@/lib/auth";
 import { getOrder, registerAgent, updateOrder } from "@/lib/db";
 import { acceptOrderSchema } from "@/lib/validation";
 import { acceptEscrowOnChain, registerAgentOnChain } from "@/lib/web3";
@@ -10,11 +11,13 @@ export async function POST(request: NextRequest, { params }: { params: Promise<{
   try {
   const { id } = await params;
   const body = await parseJson(request, acceptOrderSchema);
+  const session = requireSession(request, ["JASTIPER"]);
   const order = await getOrder(id);
   if (!order) throw new ApiError(404, "Order not found");
   if (order.status !== "CREATED") throw new ApiError(409, "Order is not open");
 
   const jastiperWallet = body.jastiperWallet;
+  requireMatchingWallet(session, jastiperWallet, "Jastiper wallet");
   if (jastiperWallet.toLowerCase() === order.buyerWallet.toLowerCase()) {
     throw new ApiError(400, "Buyer wallet cannot accept its own order");
   }

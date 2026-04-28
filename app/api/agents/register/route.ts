@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ApiError, fail, ok, parseJson } from "@/lib/api";
+import { requireMatchingWallet, requireSession } from "@/lib/auth";
 import { registerAgent } from "@/lib/db";
 import { registerAgentSchema } from "@/lib/validation";
 import { registerAgentOnChain } from "@/lib/web3";
@@ -9,8 +10,10 @@ export const runtime = "nodejs";
 export async function POST(request: NextRequest) {
   try {
   const body = await parseJson(request, registerAgentSchema);
+  const session = requireSession(request, ["JASTIPER", "ADMIN"]);
   const walletAddress = body.walletAddress || body.wallet;
   if (!walletAddress) throw new ApiError(400, "walletAddress is required");
+  if (session.role === "JASTIPER") requireMatchingWallet(session, walletAddress, "Jastiper wallet");
 
   const reputation = await registerAgent(walletAddress, body.metadataURI || "ipfs://jastip-agent/jastiper-profile");
   const txHash = await registerAgentOnChain(walletAddress, reputation.metadataURI || "ipfs://jastip-agent/jastiper-profile");

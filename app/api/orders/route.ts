@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { ApiError, fail, ok, parseJson } from "@/lib/api";
+import { requireMatchingWallet, requireSession } from "@/lib/auth";
 import { PLATFORM_FEE_PERCENT } from "@/lib/constants";
 import { calculateEscrowAmount } from "@/lib/escrowMath";
 import { createOrder, getOrders } from "@/lib/db";
@@ -18,6 +19,8 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
   const body = await parseJson(request, createOrderSchema);
+  const session = requireSession(request, ["BUYER"]);
+  requireMatchingWallet(session, body.buyerWallet, "Customer wallet");
   const destinationCountry = body.destinationCountry as Country;
   const breakdown = calculateEscrowAmount({
     destinationCountry,

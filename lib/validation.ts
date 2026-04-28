@@ -46,5 +46,8 @@ export const registerAgentSchema = z.object({
 export const loginSchema = z.object({
   role: z.enum(["BUYER", "JASTIPER", "ADMIN"]),
   name: z.string().trim().min(2).max(80),
-  walletAddress: walletSchema
+  walletAddress: walletSchema,
+  message: z.string().trim().min(20).max(1000),
+  signature: z.string().trim().min(20).max(300),
+  adminCode: z.string().trim().max(120).optional()
 });

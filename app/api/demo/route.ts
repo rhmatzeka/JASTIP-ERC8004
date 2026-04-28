@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
+import { fail } from "@/lib/api";
+import { requireSession } from "@/lib/auth";
 import {
   createVerificationReport,
   getOrders,
@@ -39,6 +41,11 @@ async function generateReport(status: VerificationStatus) {
 }
 
 export async function POST(request: NextRequest) {
+  try {
+  if (process.env.NODE_ENV === "production" && process.env.ENABLE_DEMO_TOOLS !== "true") {
+    return NextResponse.json({ error: "Demo tools are disabled in production" }, { status: 403 });
+  }
+  requireSession(request, ["ADMIN"]);
   const { action } = await request.json();
 
   if (action === "reset") {
@@ -72,4 +79,7 @@ export async function POST(request: NextRequest) {
   }
 
   return NextResponse.json({ error: "Unknown action" }, { status: 400 });
+  } catch (error) {
+    return fail(error);
+  }
 }
