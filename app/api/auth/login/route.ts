@@ -23,12 +23,23 @@ export async function POST(request: NextRequest) {
       throw new ApiError(401, "Wallet signature is invalid or expired");
     }
 
-    if (body.role === "ADMIN" && (process.env.NODE_ENV === "production" || process.env.ADMIN_INVITE_CODE)) {
-      if (!process.env.ADMIN_INVITE_CODE) {
-        throw new Error("ADMIN_INVITE_CODE is required for production admin login");
-      }
-      if (body.adminCode !== process.env.ADMIN_INVITE_CODE) {
-        return Response.json({ error: "Invalid admin invite code" }, { status: 403 });
+    if (body.role === "JASTIPER" && body.jastiperOnboardingAccepted !== true) {
+      return Response.json(
+        { error: "Jastiper onboarding approval is required before accepting orders" },
+        { status: 403 }
+      );
+    }
+
+    if (body.role === "ADMIN") {
+      const allowedWallets = (process.env.ADMIN_WALLET_ALLOWLIST || "")
+        .split(",")
+        .map((wallet) => wallet.trim().toLowerCase())
+        .filter(Boolean);
+      const walletAllowed = allowedWallets.includes(body.walletAddress.toLowerCase());
+      const inviteCodeAllowed = Boolean(process.env.ADMIN_INVITE_CODE && body.adminCode === process.env.ADMIN_INVITE_CODE);
+
+      if (!walletAllowed && !inviteCodeAllowed) {
+        return Response.json({ error: "Admin access is invite-only" }, { status: 403 });
       }
     }
 

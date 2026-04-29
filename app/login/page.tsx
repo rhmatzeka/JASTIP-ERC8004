@@ -16,13 +16,13 @@ const roleMeta: Record<AppRole, { title: string; subtitle: string; Icon: typeof 
   },
   JASTIPER: {
     title: "Jastiper",
-    subtitle: "Ambil order, upload bukti pembelian, dan bangun reputasi wallet.",
+    subtitle: "Daftar sebagai agent, setujui onboarding, lalu ambil order dan bangun reputasi wallet.",
     Icon: UsersRound,
     redirect: "/marketplace"
   },
   ADMIN: {
-    title: "Admin Demo",
-    subtitle: "Seed data, generate report, dan siapkan alur presentasi hackathon.",
+    title: "Admin Invite",
+    subtitle: "Akses internal untuk seed data dan kontrol demo. Wajib invite code atau wallet allowlist.",
     Icon: ShieldCheck,
     redirect: "/demo"
   }
@@ -38,6 +38,7 @@ function LoginContent() {
   const [name, setName] = useState("");
   const [walletAddress, setWalletAddress] = useState("");
   const [adminCode, setAdminCode] = useState("");
+  const [jastiperAccepted, setJastiperAccepted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [connecting, setConnecting] = useState(false);
   const [error, setError] = useState("");
@@ -47,6 +48,7 @@ function LoginContent() {
   function chooseRole(role: AppRole) {
     setSelectedRole(role);
     setAdminCode("");
+    setJastiperAccepted(false);
   }
 
   async function connectWallet() {
@@ -74,11 +76,24 @@ function LoginContent() {
       setError("Connect wallet dulu sebelum lanjut.");
       return;
     }
+    if (selectedRole === "JASTIPER" && !jastiperAccepted) {
+      setError("Setujui onboarding Jastiper dulu sebelum menerima order.");
+      return;
+    }
+    if (selectedRole === "ADMIN" && !adminCode.trim()) {
+      setError("Admin wajib memakai invite code atau wallet yang sudah di-allowlist.");
+      return;
+    }
 
     setLoading(true);
     setError("");
     try {
-      await login(selectedRole, { name, walletAddress, adminCode });
+      await login(selectedRole, {
+        name,
+        walletAddress,
+        adminCode,
+        jastiperOnboardingAccepted: selectedRole === "JASTIPER" ? jastiperAccepted : undefined
+      });
       router.push(selected.redirect);
     } catch (loginError) {
       setError(loginError instanceof Error ? loginError.message : "Login failed");
@@ -88,17 +103,17 @@ function LoginContent() {
   }
 
   return (
-    <main className="flex min-h-[calc(100vh-64px)] items-center justify-center p-5">
-      <div className="w-full max-w-[820px] rounded-2xl border border-white/[0.06] bg-[#141419] shadow-elevated overflow-hidden grid lg:grid-cols-[1fr_1.1fr]">
+    <main className="flex min-h-[calc(100vh-72px)] items-center justify-center p-6">
+      <div className="w-full max-w-[840px] rounded-2xl border border-white/[0.05] bg-[#080808] overflow-hidden grid lg:grid-cols-[1fr_1.1fr]" style={{ boxShadow: '0 4px 60px rgba(0,0,0,0.6)' }}>
         {/* Left — Role selector */}
-        <section className="border-r border-white/[0.04] bg-white/[0.01] p-6 lg:p-7">
+        <section className="border-r border-white/[0.04] bg-white/[0.01] p-7">
           <p className="eyebrow">Authentication</p>
-          <h1 className="mt-2 text-xl font-bold text-white">Pilih Akses Anda</h1>
-          <p className="mt-2 text-sm leading-relaxed text-muted">
+          <h1 className="mt-3 text-xl text-white">Pilih Akses Anda</h1>
+          <p className="mt-2 text-[13px] leading-[1.7] text-[#777]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>
             Session dibuat setelah wallet terhubung dan menandatangani pesan login.
           </p>
 
-          <div className="mt-6 grid gap-2.5">
+          <div className="mt-7 grid gap-2.5">
             {(Object.keys(DEMO_PROFILES) as AppRole[]).map((role) => {
               const meta = roleMeta[role];
               const Icon = meta.Icon;
@@ -107,21 +122,21 @@ function LoginContent() {
                 <button
                   key={role}
                   type="button"
-                  className={`flex w-full items-center gap-3 rounded-xl border p-3 text-left transition-all duration-200 ${
+                  className={`flex w-full items-center gap-3 rounded-xl border p-3.5 text-left transition-all duration-300 ${
                     active
-                      ? "border-accent/30 bg-accent/[0.06]"
-                      : "border-white/[0.06] bg-white/[0.01] hover:border-white/[0.1] hover:bg-white/[0.03]"
+                      ? "border-[#d4ff00]/20 bg-[#d4ff00]/[0.04]"
+                      : "border-white/[0.05] bg-white/[0.01] hover:border-white/[0.08] hover:bg-white/[0.02]"
                   }`}
                   onClick={() => chooseRole(role)}
                 >
                   <span className={`grid h-9 w-9 shrink-0 place-items-center rounded-lg transition-colors ${
-                    active ? "bg-accent/15 text-accent" : "bg-white/[0.04] text-muted"
+                    active ? "bg-[#d4ff00]/10 text-[#d4ff00]" : "bg-white/[0.03] text-[#888]"
                   }`}>
-                    <Icon size={16} />
+                    <Icon size={15} strokeWidth={1.5} />
                   </span>
                   <div className="min-w-0">
-                    <span className="block text-sm font-semibold text-white">{meta.title}</span>
-                    <span className="mt-0.5 block text-[11px] leading-relaxed text-muted line-clamp-1">{meta.subtitle}</span>
+                    <span className="block text-[13px] font-semibold text-white">{meta.title}</span>
+                    <span className="mt-0.5 block text-[11px] leading-relaxed text-[#777] line-clamp-1" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>{meta.subtitle}</span>
                   </div>
                 </button>
               );
@@ -130,16 +145,16 @@ function LoginContent() {
         </section>
 
         {/* Right — Form */}
-        <section className="p-6 lg:p-7 flex flex-col justify-center">
+        <section className="p-7 flex flex-col justify-center">
           <p className="eyebrow">Akses Portal</p>
-          <h2 className="mt-1.5 text-xl font-bold text-white">{selected.title}</h2>
-          <p className="mt-1 text-sm leading-relaxed text-muted">{selected.subtitle}</p>
+          <h2 className="mt-2 text-xl text-white">{selected.title}</h2>
+          <p className="mt-1.5 text-[13px] leading-[1.7] text-[#777]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>{selected.subtitle}</p>
 
-          <div className="mt-6 grid gap-4">
+          <div className="mt-7 grid gap-4">
             <label className="block">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-accent">Identitas</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#888]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>Identitas</span>
               <input
-                className="input mt-1.5 h-10 text-sm"
+                className="input mt-1.5 h-10 text-[13px]"
                 value={name}
                 onChange={(event) => {
                   setName(event.target.value);
@@ -150,7 +165,7 @@ function LoginContent() {
             </label>
 
             <label className="block">
-              <span className="text-[11px] font-medium uppercase tracking-wider text-accent">Wallet address</span>
+              <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#888]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>Wallet address</span>
               <div className="mt-1.5 flex gap-2">
                 <input
                   className="input h-10 font-mono text-[11px] truncate"
@@ -158,8 +173,8 @@ function LoginContent() {
                   readOnly
                   placeholder="Connect wallet untuk mengisi address"
                 />
-                <button type="button" className="btn-secondary shrink-0 px-3 text-xs" onClick={connectWallet} disabled={connecting}>
-                  <Wallet size={14} className="mr-1" />
+                <button type="button" className="btn-secondary shrink-0 px-3 text-[11px] min-h-[40px]" onClick={connectWallet} disabled={connecting}>
+                  <Wallet size={13} className="mr-1" strokeWidth={1.5} />
                   {connecting ? "Connecting" : walletAddress ? "Ganti" : "Connect"}
                 </button>
               </div>
@@ -167,23 +182,40 @@ function LoginContent() {
 
             {selectedRole === "ADMIN" ? (
               <label className="block">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-accent">Admin Invite Code</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#888]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>Admin Invite Code</span>
                 <input
-                  className="input mt-1.5 h-10 text-sm"
+                  className="input mt-1.5 h-10 text-[13px]"
                   type="password"
                   value={adminCode}
                   onChange={(event) => setAdminCode(event.target.value)}
-                  placeholder="Required in production"
+                  placeholder="Masukkan invite code admin"
                 />
+                <span className="mt-2 block text-[11px] leading-relaxed text-[#666]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>
+                  Admin tidak bisa self-select. Wallet harus masuk allowlist atau memakai invite code.
+                </span>
+              </label>
+            ) : null}
+            {selectedRole === "JASTIPER" ? (
+              <label className="flex gap-3 rounded-xl border border-white/[0.05] bg-white/[0.015] p-3.5 text-[12px] leading-[1.7] text-[#777]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>
+                <input
+                  type="checkbox"
+                  className="mt-1 h-4 w-4 shrink-0 accent-[#d4ff00]"
+                  checked={jastiperAccepted}
+                  onChange={(event) => setJastiperAccepted(event.target.checked)}
+                />
+                <span>
+                  Saya menyetujui onboarding Jastiper: bukti pembelian wajib valid, reputasi wallet akan tercatat, dan
+                  akses order bisa dibatasi jika terjadi dispute/fraud.
+                </span>
               </label>
             ) : null}
           </div>
 
-          <button className="btn-primary mt-8 w-full py-3 text-sm" onClick={submit} disabled={loading}>
+          <button className="btn-primary mt-8 w-full py-3 text-[13px]" onClick={submit} disabled={loading}>
             {loading ? "Menunggu signature..." : `Lanjutkan sebagai ${selected.title}`}
           </button>
           {error ? (
-            <p className="mt-3 rounded-xl bg-danger/10 border border-danger/20 p-3 text-xs font-medium text-rose-200 text-center">{error}</p>
+            <p className="mt-3 rounded-xl bg-[#ef4444]/10 border border-[#ef4444]/15 p-3 text-[12px] font-medium text-[#f87171] text-center">{error}</p>
           ) : null}
         </section>
       </div>
@@ -196,7 +228,7 @@ export default function LoginPage() {
     <Suspense
       fallback={
         <main className="page-shell">
-          <div className="panel p-8 text-center text-muted">Loading login...</div>
+          <div className="panel p-10 text-center text-[13px] text-[#777]">Loading login...</div>
         </main>
       }
     >

@@ -16,6 +16,7 @@ type DemoSession = {
 
 type LoginOverrides = Partial<Omit<DemoSession, "role">> & {
   adminCode?: string;
+  jastiperOnboardingAccepted?: boolean;
   message?: string;
   signature?: string;
 };
@@ -86,7 +87,8 @@ export function useDemoProfile() {
       walletAddress,
       message: signedLogin.message,
       signature: signedLogin.signature,
-      adminCode: overrides?.adminCode
+      adminCode: overrides?.adminCode,
+      jastiperOnboardingAccepted: overrides?.jastiperOnboardingAccepted
     };
 
     const response = await fetch("/api/auth/login", {
@@ -115,10 +117,15 @@ export function useDemoProfile() {
   }
 
   async function setRole(nextRole: AppRole) {
+    if (nextRole === "ADMIN") {
+      throw new Error("Admin access is invite-only. Login through the admin invite flow.");
+    }
+
     const profile = DEMO_PROFILES[nextRole];
     return login(nextRole, {
       name: session?.role === nextRole ? session.name : profile.name,
-      walletAddress: session?.walletAddress
+      walletAddress: session?.walletAddress,
+      jastiperOnboardingAccepted: nextRole === "JASTIPER" ? true : undefined
     });
   }
 

@@ -11,7 +11,7 @@ export async function GET() {
   const chainWrites = process.env.ENABLE_SERVER_CHAIN_WRITES === "true";
   const checks = {
     authSecret: present(process.env.AUTH_SECRET),
-    adminInviteCode: present(process.env.ADMIN_INVITE_CODE),
+    adminAccess: present(process.env.ADMIN_INVITE_CODE) || present(process.env.ADMIN_WALLET_ALLOWLIST),
     database: isSupabaseConfigured(),
     openai: present(process.env.OPENAI_API_KEY),
     appUrl: present(process.env.NEXT_PUBLIC_APP_URL),

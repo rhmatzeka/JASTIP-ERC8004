@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import { Loader2, ScanLine } from "lucide-react";
@@ -10,7 +11,7 @@ import type { Order } from "@/lib/types";
 export default function VerifyOrderPage() {
   const params = useParams<{ id: string }>();
   const router = useRouter();
-  const { isReady, isLoggedIn, role, profile, setRole } = useDemoProfile();
+  const { isReady, isLoggedIn, role, profile } = useDemoProfile();
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [order, setOrder] = useState<Order | null>(null);
@@ -64,9 +65,9 @@ export default function VerifyOrderPage() {
           <p className="mt-2 text-sm text-muted">
             Kamu sedang memakai mode {profile.label}. Pindah ke Jastiper yang assigned ke order ini untuk upload bukti.
           </p>
-          <button className="btn-primary mt-4" onClick={() => setRole("JASTIPER")}>
-            Switch to Jastiper
-          </button>
+          <Link className="btn-primary mt-4" href="/login?role=JASTIPER">
+            Login sebagai Jastiper
+          </Link>
         </section>
       ) : null}
       <section className="panel p-5">

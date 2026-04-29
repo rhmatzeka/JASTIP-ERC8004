@@ -18,7 +18,7 @@ const actions = [
 
 export default function DemoPage() {
   const router = useRouter();
-  const { isReady, isLoggedIn, role, profile, setRole } = useDemoProfile();
+  const { isReady, isLoggedIn, role, profile } = useDemoProfile();
   const [message, setMessage] = useState("");
   const [orderId, setOrderId] = useState("");
 
@@ -39,63 +39,65 @@ export default function DemoPage() {
   }
 
   return (
-    <main className="mx-auto max-w-5xl px-5 py-10 sm:px-6 lg:px-8">
-      <div className="mb-8">
-        <p className="eyebrow">Hackathon-only controls</p>
-        <h1 className="page-title">Demo Admin</h1>
-      </div>
-      {role !== "ADMIN" ? (
-        <section className="panel mb-6 p-5">
-          <p className="font-semibold text-white">Halaman ini untuk Admin.</p>
-          <p className="mt-2 text-sm text-muted">
-            Kamu sedang memakai mode {profile.label}. Pindah ke Admin untuk seed data dan generate report demo.
-          </p>
-          <button className="btn-primary mt-4" onClick={() => setRole("ADMIN")}>
-            Switch to Admin
-          </button>
-        </section>
-      ) : null}
-      <section className="panel p-5">
-        <div className="grid gap-3 md:grid-cols-2">
-          {actions.map(([action, label, Icon]) => (
-            <button
-              key={action}
-              className={action === "reset" ? "btn-danger" : "btn-secondary"}
-              onClick={() => run(action)}
-              disabled={role !== "ADMIN"}
-            >
-              <Icon size={16} />
-              {label}
-            </button>
-          ))}
+    <main className="page-shell">
+      <div className="max-w-5xl mx-auto">
+        <div className="mb-10">
+          <p className="eyebrow">Hackathon-only controls</p>
+          <h1 className="page-title">Demo Admin</h1>
         </div>
-        {message ? <p className="mt-5 rounded-xl bg-accent/10 border border-accent/20 p-3 text-sm font-medium text-white">{message}</p> : null}
-        <div className="mt-5 flex flex-wrap gap-3">
-          <Link className="btn-primary" href="/marketplace">
-            Open marketplace
-          </Link>
-          {orderId ? (
-            <Link className="btn-secondary" href={`/orders/${orderId}`}>
-              Open seeded order
-            </Link>
-          ) : null}
-        </div>
-      </section>
-      <section className="mt-6 grid gap-4 md:grid-cols-3">
-        {["Create order", "Accept as jastiper", "Upload proof and release"].map((title, index) => (
-          <div key={title} className="panel p-5">
-            <p className="eyebrow">0{index + 1}</p>
-            <h2 className="mt-2 text-base font-semibold text-white">{title}</h2>
-            <p className="mt-2 text-sm leading-6 text-muted">
-              {index === 0
-                ? "Seed the Nike Japan order or create a custom customer order."
-                : index === 1
-                  ? "Attach a jastiper wallet and registry identity."
-                  : "Generate AI verification, release escrow, then show reputation."}
+        {role !== "ADMIN" ? (
+          <section className="panel mb-6 p-6">
+            <p className="font-semibold text-white text-[14px]">Halaman ini untuk Admin.</p>
+            <p className="mt-2 text-[13px] text-[#777]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>
+              Kamu sedang memakai mode {profile.label}. Pindah ke Admin untuk seed data dan generate report demo.
             </p>
+            <Link className="btn-primary mt-4 text-[13px]" href="/login?role=ADMIN">
+              Login via admin invite
+            </Link>
+          </section>
+        ) : null}
+        <section className="panel p-6">
+          <div className="grid gap-3 md:grid-cols-2">
+            {actions.map(([action, label, Icon]) => (
+              <button
+                key={action}
+                className={action === "reset" ? "btn-danger" : "btn-secondary"}
+                onClick={() => run(action)}
+                disabled={role !== "ADMIN"}
+              >
+                <Icon size={15} strokeWidth={1.5} />
+                {label}
+              </button>
+            ))}
           </div>
-        ))}
-      </section>
+          {message ? <p className="mt-5 rounded-xl bg-[#d4ff00]/10 border border-[#d4ff00]/15 p-3 text-[13px] font-medium text-white">{message}</p> : null}
+          <div className="mt-5 flex flex-wrap gap-3">
+            <Link className="btn-primary text-[13px]" href="/marketplace">
+              Open marketplace
+            </Link>
+            {orderId ? (
+              <Link className="btn-secondary text-[13px]" href={`/orders/${orderId}`}>
+                Open seeded order
+              </Link>
+            ) : null}
+          </div>
+        </section>
+        <section className="mt-6 grid gap-4 md:grid-cols-3">
+          {["Create order", "Accept as jastiper", "Upload proof and release"].map((title, index) => (
+            <div key={title} className="panel p-6">
+              <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#666]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>0{index + 1}</p>
+              <h2 className="mt-3 text-[15px] text-white">{title}</h2>
+              <p className="mt-2 text-[12px] leading-[1.7] text-[#777]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>
+                {index === 0
+                  ? "Seed the Nike Japan order or create a custom customer order."
+                  : index === 1
+                    ? "Attach a jastiper wallet and registry identity."
+                    : "Generate AI verification, release escrow, then show reputation."}
+              </p>
+            </div>
+          ))}
+        </section>
+      </div>
     </main>
   );
 }

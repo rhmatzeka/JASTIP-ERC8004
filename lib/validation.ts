@@ -49,5 +49,6 @@ export const loginSchema = z.object({
   walletAddress: walletSchema,
   message: z.string().trim().min(20).max(1000),
   signature: z.string().trim().min(20).max(300),
-  adminCode: z.string().trim().max(120).optional()
+  adminCode: z.string().trim().max(120).optional(),
+  jastiperOnboardingAccepted: z.boolean().optional()
 });
