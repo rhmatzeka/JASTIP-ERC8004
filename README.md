@@ -22,11 +22,17 @@ This MVP adds:
 
 ## Product Flow
 
-The app has three explicit modes in the header:
+The app has three product roles:
 
-- `Buyer`: creates jastip orders, reviews AI reports, releases funds, or opens disputes
-- `Jastiper`: accepts open marketplace orders and uploads purchase proof
-- `Admin`: seeds demo data and generates judge-ready reports
+- `Buyer`: creates jastip orders, reviews AI reports, releases funds, or opens disputes.
+- `Jastiper`: completes onboarding, accepts open marketplace orders, uploads purchase proof, and builds wallet reputation.
+- `Admin`: invite-only operator access for seeding demo data and generating judge-ready reports.
+
+Access model:
+
+- Anyone can become a Buyer.
+- Anyone can apply as a Jastiper, but the login flow requires explicit onboarding acceptance before marketplace actions.
+- Admin cannot be self-selected from the app shell. Admin access requires either `ADMIN_INVITE_CODE` or a wallet listed in `ADMIN_WALLET_ALLOWLIST`.
 
 Flow:
 
@@ -132,6 +138,12 @@ For local demo mode, you can leave most values empty.
 
 ```text
 NEXT_PUBLIC_APP_URL=http://localhost:3001
+AUTH_SECRET=
+ADMIN_INVITE_CODE=
+ADMIN_WALLET_ALLOWLIST=
+ENABLE_DEMO_TOOLS=false
+ALLOW_MOCK_AI=false
+NEXT_PUBLIC_ENABLE_MOCK_TOOLS=false
 OPENAI_API_KEY=
 NEXT_PUBLIC_PRIVY_APP_ID=
 NEXT_PUBLIC_SEPOLIA_RPC_URL=
@@ -150,6 +162,9 @@ CLOUDINARY_API_SECRET=
 
 Important values:
 
+- `AUTH_SECRET`: signs server-side session cookies
+- `ADMIN_INVITE_CODE`: enables invite-code based Admin login
+- `ADMIN_WALLET_ALLOWLIST`: comma-separated Admin wallet allowlist
 - `OPENAI_API_KEY`: enables real GPT-4o Vision verification
 - `NEXT_PUBLIC_SEPOLIA_RPC_URL`: Sepolia RPC endpoint
 - `PRIVATE_KEY`: deployer/operator private key
@@ -165,6 +180,9 @@ Never commit `.env.local`.
 This version is stricter than a pure demo scaffold:
 
 - API payloads are validated with `zod`
+- Admin login is invite-only through invite code or wallet allowlist
+- Jastiper access requires onboarding acceptance before marketplace actions
+- The app shell no longer exposes a role dropdown that can jump into Admin
 - EVM wallet addresses are checked before write actions
 - Invalid order state transitions are rejected
 - Verification cannot run before a jastiper accepts an order
@@ -338,17 +356,18 @@ POST /api/demo
 
 Fastest judge flow:
 
-1. Open `/` and choose `Masuk sebagai Admin`.
-2. Open `/demo`.
-3. Click `Seed demo buyer order`.
-4. Click `Seed demo jastiper`.
-5. Switch role to `Jastiper`.
-6. Open `/marketplace`.
-7. Select the Nike Japan order and click `Accept Order`.
-8. Switch role to `Admin` and generate a mock approved AI report, or stay as Jastiper and upload real proof photos.
-9. Switch role to `Buyer`.
-10. Open the order, review `Laporan Verifikasi AI`, then click `Lepas Dana`.
-11. Open `/reputation` and show the jastiper's trust score increase.
+1. Set `ADMIN_INVITE_CODE` in `.env.local`.
+2. Open `/login?role=ADMIN`.
+3. Connect wallet, enter the invite code, and continue to `/demo`.
+4. Click `Seed demo buyer order`.
+5. Click `Seed demo jastiper`.
+6. Open `/login?role=JASTIPER`, connect wallet, accept onboarding, and continue.
+7. Open `/marketplace`.
+8. Select the Nike Japan order and click `Accept Order`.
+9. Upload proof photos as Jastiper, or return to Admin and generate a mock approved AI report.
+10. Open `/login?role=BUYER` and continue as Customer.
+11. Open the order, review `Laporan Verifikasi AI`, then click `Lepas Dana`.
+12. Open `/reputation` and show the jastiper's trust score increase.
 
 Recommended demo URL:
 
@@ -400,6 +419,12 @@ npm run build
 npm run compile
 npm run deploy:sepolia
 ```
+
+## Frontend Experience
+
+The landing page uses a pinned Spline 3D hero scene. The scene stays fixed while the first content section scrolls over it, then the iframe is visually hidden once the hero is covered to reduce rendering cost. Returning to the top reveals the already-mounted scene without forcing a full iframe reload.
+
+Navigation uses a floating pill header that compacts on scroll. Internal route transitions show a global loading overlay, and the Spline hero has its own `Loading 3D scene` state so the route does not appear ready before the 3D asset is visible.
 
 ## Supabase Schema
 
