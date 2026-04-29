@@ -83,18 +83,18 @@ export default function NewOrderPage() {
   return (
     <main className="page-shell">
       <div className="max-w-6xl mx-auto">
-        <div className="mb-8">
+        <div className="mb-10">
           <p className="eyebrow">Titip barang</p>
           <h1 className="page-title">Buat Order Jastip</h1>
         </div>
 
         {role !== "BUYER" ? (
-          <section className="panel mb-6 p-5 border-danger/20">
-            <p className="text-sm font-semibold text-white">Halaman ini untuk Customer.</p>
-            <p className="mt-1 text-xs text-muted">
+          <section className="panel mb-6 p-6 border-[#ef4444]/10">
+            <p className="text-[13px] font-semibold text-white">Halaman ini untuk Customer.</p>
+            <p className="mt-1.5 text-[12px] text-[#777]">
               Kamu sedang memakai mode {profile.label}. Pindah ke Customer untuk membuat order jastip.
             </p>
-            <button className="btn-primary mt-4 text-xs py-2 px-4" onClick={() => setRole("BUYER")}>
+            <button className="btn-primary mt-4 text-[12px] py-2 px-5" onClick={() => setRole("BUYER")}>
               Switch to Customer
             </button>
           </section>
@@ -112,9 +112,9 @@ export default function NewOrderPage() {
                 ["targetStore", "Target store"]
               ].map(([key, label]) => (
                 <label key={key} className="block">
-                  <span className="text-[11px] font-medium uppercase tracking-wider text-accent">{label}</span>
+                  <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#888]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>{label}</span>
                   <input
-                    className="input mt-1.5 h-10 text-sm"
+                    className="input mt-1.5 h-10 text-[13px]"
                     value={form[key as keyof OrderForm]}
                     onChange={(event) => setForm({ ...form, [key]: event.target.value })}
                   />
@@ -122,23 +122,23 @@ export default function NewOrderPage() {
               ))}
 
               <label className="block">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-accent">Destination country</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#888]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>Destination country</span>
                 <select
-                  className="input mt-1.5 h-10 text-sm appearance-none cursor-pointer"
+                  className="input mt-1.5 h-10 text-[13px] appearance-none cursor-pointer"
                   value={form.destinationCountry}
                   onChange={(event) => setForm({ ...form, destinationCountry: event.target.value as Country })}
                 >
-                  <option value="" disabled className="bg-[#141419]">Select country</option>
-                  <option value="Japan" className="bg-[#141419]">Japan</option>
-                  <option value="Korea" className="bg-[#141419]">Korea</option>
-                  <option value="Singapore" className="bg-[#141419]">Singapore</option>
+                  <option value="" disabled className="bg-[#080808]">Select country</option>
+                  <option value="Japan" className="bg-[#080808]">Japan</option>
+                  <option value="Korea" className="bg-[#080808]">Korea</option>
+                  <option value="Singapore" className="bg-[#080808]">Singapore</option>
                 </select>
               </label>
 
               <label className="block">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-accent">Estimated local price</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#888]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>Estimated local price</span>
                 <input
-                  className="input mt-1.5 h-10 text-sm"
+                  className="input mt-1.5 h-10 text-[13px]"
                   type="number"
                   value={form.estimatedLocalPrice}
                   placeholder="e.g., 7000"
@@ -147,9 +147,9 @@ export default function NewOrderPage() {
               </label>
 
               <label className="block">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-accent">Max budget (IDR)</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#888]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>Max budget (IDR)</span>
                 <input
-                  className="input mt-1.5 h-10 text-sm"
+                  className="input mt-1.5 h-10 text-[13px]"
                   type="number"
                   value={form.maxBudgetIdr}
                   placeholder="e.g., 950000"
@@ -158,9 +158,9 @@ export default function NewOrderPage() {
               </label>
 
               <label className="block">
-                <span className="text-[11px] font-medium uppercase tracking-wider text-accent">Service fee (%)</span>
+                <span className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#888]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>Service fee (%)</span>
                 <input
-                  className="input mt-1.5 h-10 text-sm"
+                  className="input mt-1.5 h-10 text-[13px]"
                   type="number"
                   value={form.serviceFeePercent}
                   placeholder="e.g., 12"
@@ -180,10 +180,10 @@ export default function NewOrderPage() {
 
             <div className="mt-8">
               <button className="btn-primary w-full py-3" onClick={submit} disabled={loading}>
-                {loading ? <Loader2 className="animate-spin mr-2" size={16} /> : <ArrowRight className="mr-2" size={16} />}
+                {loading ? <Loader2 className="animate-spin mr-2" size={15} /> : <ArrowRight className="mr-2" size={15} />}
                 Create Escrow Order
               </button>
-              {error ? <p className="mt-3 rounded-xl bg-danger/10 border border-danger/20 p-3 text-xs font-medium text-rose-200 text-center">{error}</p> : null}
+              {error ? <p className="mt-3 rounded-xl bg-[#ef4444]/10 border border-[#ef4444]/15 p-3 text-[12px] font-medium text-[#f87171] text-center">{error}</p> : null}
             </div>
           </section>
 

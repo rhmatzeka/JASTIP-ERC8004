@@ -16,7 +16,7 @@ export default function UploadBox({
   const [error, setError] = useState("");
 
   return (
-    <label className="block w-full cursor-pointer rounded-xl border border-dashed border-white/[0.1] bg-white/[0.02] p-5 transition-all hover:border-accent/30 hover:bg-accent/[0.03] group">
+    <label className="block w-full cursor-pointer rounded-xl border border-dashed border-white/[0.08] bg-[#060606] p-5 transition-all hover:border-[#d4ff00]/20 hover:bg-[#0a0a0a] group">
       <input
         className="sr-only"
         type="file"
@@ -44,16 +44,16 @@ export default function UploadBox({
         }}
       />
       <div className="flex flex-col items-center justify-center text-center gap-2.5">
-        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-accent/10 text-accent transition-transform group-hover:scale-105">
-          <ImageUp size={16} />
+        <span className="grid h-10 w-10 shrink-0 place-items-center rounded-full bg-white/[0.03] text-[#888] transition-all group-hover:text-[#d4ff00] group-hover:bg-[#d4ff00]/10">
+          <ImageUp size={16} strokeWidth={1.5} />
         </span>
         <div className="min-w-0">
-          <p className="text-sm font-medium text-white">{label}</p>
-          <p className="mt-1 text-[11px] text-muted">{uploading ? "Uploading..." : value ? "Photo attached" : "Click to upload image"}</p>
+          <p className="text-[13px] font-medium text-white">{label}</p>
+          <p className="mt-1 text-[11px] text-[#666]">{uploading ? "Uploading..." : value ? "Photo attached" : "Click to upload image"}</p>
         </div>
       </div>
-      {error ? <p className="mt-3 rounded-lg bg-danger/10 p-2.5 text-[11px] font-medium text-rose-300 text-center">{error}</p> : null}
-      {value ? <img src={value} alt={label} className="mt-3 h-24 w-full rounded-lg border border-white/[0.06] object-cover" /> : null}
+      {error ? <p className="mt-3 rounded-lg bg-[#ef4444]/10 border border-[#ef4444]/15 p-2.5 text-[11px] font-medium text-[#f87171] text-center">{error}</p> : null}
+      {value ? <img src={value} alt={label} className="mt-3 h-24 w-full rounded-lg border border-white/[0.05] object-cover" /> : null}
     </label>
   );
 }

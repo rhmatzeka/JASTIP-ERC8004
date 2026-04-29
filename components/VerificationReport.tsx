@@ -12,37 +12,37 @@ export default function VerificationReport({ report }: { report: VerificationRep
   ];
 
   return (
-    <section className="panel p-5">
+    <section className="panel p-6">
       <div className="mb-5 flex items-start justify-between gap-4">
         <div>
-          <p className="eyebrow">Laporan verifikasi AI</p>
-          <h2 className="mt-2 text-xl font-bold text-white">Final status</h2>
+          <p className="text-[10px] font-semibold uppercase tracking-[0.15em] text-[#888]" style={{ fontFamily: 'var(--font-sans)', fontStyle: 'normal' }}>Laporan verifikasi AI</p>
+          <h2 className="mt-2 text-xl text-white">Final status</h2>
         </div>
         <StatusBadge status={report.overallStatus} />
       </div>
       <div className="grid gap-3 md:grid-cols-2">
         {metrics.map(([label, value, Icon]) => (
-          <div key={String(label)} className="rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-            <div className="mb-2 flex items-center gap-2 text-sm font-semibold text-white">
-              <Icon size={16} className="text-accent/70" />
+          <div key={String(label)} className="rounded-xl border border-white/[0.05] bg-white/[0.015] p-4">
+            <div className="mb-2 flex items-center gap-2 text-[13px] font-semibold text-white">
+              <Icon size={15} className="text-[#888]" strokeWidth={1.5} />
               {label}
             </div>
-            <p className="text-sm text-muted">{value}</p>
+            <p className="text-[12px] text-[#777]">{value}</p>
           </div>
         ))}
       </div>
-      <div className="mt-4 rounded-xl border border-white/[0.06] bg-white/[0.02] p-4">
-        <p className="text-sm font-semibold text-white">AI notes</p>
-        <p className="mt-1.5 text-sm leading-6 text-muted">{report.itemNotes}</p>
+      <div className="mt-4 rounded-xl border border-white/[0.05] bg-white/[0.015] p-4">
+        <p className="text-[13px] font-semibold text-white">AI notes</p>
+        <p className="mt-1.5 text-[12px] leading-[1.7] text-[#777]">{report.itemNotes}</p>
       </div>
       <div className="mt-4">
-        <p className="text-sm font-semibold text-white">Fraud flags</p>
+        <p className="text-[13px] font-semibold text-white">Fraud flags</p>
         {report.fraudFlags.length === 0 ? (
-          <p className="mt-1.5 text-sm text-muted">No flags detected.</p>
+          <p className="mt-1.5 text-[12px] text-[#777]">No flags detected.</p>
         ) : (
           <div className="mt-2 flex flex-wrap gap-2">
             {report.fraudFlags.map((flag) => (
-              <span key={flag} className="rounded-full bg-warn/10 px-3 py-1 text-xs font-medium text-amber-200">
+              <span key={flag} className="rounded-full bg-[#f59e0b]/10 border border-[#f59e0b]/15 px-3 py-1 text-[11px] font-medium text-[#f5c842]">
                 {flag}
               </span>
             ))}

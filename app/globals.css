@@ -5,8 +5,8 @@
 /* ─── Base ───────────────────────────────────────────────────────── */
 :root {
   color-scheme: dark;
-  color: #f0f0f5;
-  background: #0c0c10;
+  color: #e8e8ed;
+  background: #000000;
 }
 
 * {
@@ -16,15 +16,26 @@
 body {
   margin: 0;
   min-height: 100vh;
-  background-color: #0c0c10;
-  background-image:
-    radial-gradient(ellipse 80% 60% at 50% -20%, rgba(99, 102, 241, 0.08), transparent),
-    radial-gradient(ellipse 60% 40% at 80% 100%, rgba(167, 139, 250, 0.05), transparent);
-  background-attachment: fixed;
-  font-family: "Inter", ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  background-color: #000000;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
   letter-spacing: -0.01em;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+}
+
+/* Only h1/h2 and specific hero classes get the display serif font */
+h1, h2,
+.page-title,
+.hero-wordmark {
+  font-family: var(--font-display), "Times New Roman", ui-serif, Georgia, serif;
+  font-weight: 400;
+  font-style: italic;
+}
+
+/* h3 and below stay as sans-serif for readability */
+h3, h4, h5, h6 {
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-weight: 600;
 }
 
 a {
@@ -36,95 +47,137 @@ button, input, select, textarea {
   font: inherit;
 }
 
+/* ─── Section glow divider (amber radial gradient band) ──────────── */
+.section-glow {
+  position: relative;
+}
+
+.section-glow::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 120%;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(212, 180, 60, 0.3), rgba(255, 200, 50, 0.5), rgba(212, 180, 60, 0.3), transparent);
+}
+
+.section-glow::after {
+  content: "";
+  position: absolute;
+  top: -60px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 120px;
+  background: radial-gradient(ellipse at center, rgba(200, 160, 40, 0.08), transparent 70%);
+  pointer-events: none;
+}
+
 /* ─── Panel / Card ───────────────────────────────────────────────── */
 .panel {
-  @apply rounded-2xl border border-white/[0.06] bg-[#141419] transition-all duration-200;
-  box-shadow: 0 1px 2px rgba(0,0,0,0.2), 0 0 0 1px rgba(255,255,255,0.03);
+  @apply rounded-2xl border border-white/[0.05] bg-[#080808] transition-all duration-300;
+  box-shadow: 0 0 0 0 transparent;
 }
 
 .panel:hover {
-  @apply border-white/[0.1] bg-[#18181f];
+  @apply border-white/[0.08];
 }
 
 /* ─── Input ──────────────────────────────────────────────────────── */
 .input {
-  @apply w-full rounded-xl border border-white/[0.08] bg-white/[0.03] px-4 py-3 text-sm text-ink outline-none transition-all placeholder:text-muted/40;
+  @apply w-full rounded-xl border border-white/[0.07] bg-[#0a0a0a] px-4 py-3 text-sm text-ink outline-none transition-all placeholder:text-[#555];
 }
 
 .input:focus {
-  @apply border-accent/40 bg-white/[0.05] ring-2 ring-accent/10;
+  @apply border-[#c8a028]/40 ring-1 ring-[#c8a028]/10;
+  background: #0d0d0d;
 }
 
 /* ─── Buttons ────────────────────────────────────────────────────── */
 .btn-primary {
-  @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-accent px-5 py-2.5 text-sm font-semibold text-white shadow-button transition-all duration-200;
+  @apply inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full px-7 py-2.5 text-sm font-semibold transition-all duration-300;
+  background: #d4ff00;
+  color: #000;
+  box-shadow: 0 0 20px rgba(212, 255, 0, 0.12);
 }
 
 .btn-primary:hover {
-  @apply bg-accentMuted shadow-elevated;
+  background: #e0ff40;
+  box-shadow: 0 0 30px rgba(212, 255, 0, 0.25);
   transform: translateY(-1px);
 }
 
 .btn-primary:disabled {
-  @apply cursor-not-allowed opacity-50;
+  @apply cursor-not-allowed opacity-40;
   transform: none;
 }
 
 .btn-secondary {
-  @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl border border-white/[0.08] bg-white/[0.03] px-5 py-2.5 text-sm font-medium text-ink transition-all duration-200;
+  @apply inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full border border-white/[0.08] px-7 py-2.5 text-sm font-medium text-[#aaa] transition-all duration-300;
+  background: rgba(255, 255, 255, 0.02);
 }
 
 .btn-secondary:hover {
-  @apply border-white/[0.15] bg-white/[0.06] text-white;
+  @apply border-white/[0.15] text-white;
+  background: rgba(255, 255, 255, 0.04);
+  transform: translateY(-1px);
 }
 
 .btn-secondary:disabled {
-  @apply cursor-not-allowed opacity-50;
+  @apply cursor-not-allowed opacity-40;
+  transform: none;
 }
 
 .btn-danger {
-  @apply inline-flex min-h-[44px] items-center justify-center gap-2 rounded-xl bg-danger/90 px-5 py-2.5 text-sm font-semibold text-white transition-all duration-200;
+  @apply inline-flex min-h-[42px] items-center justify-center gap-2 rounded-full bg-[#ff4444]/80 px-6 py-2.5 text-sm font-semibold text-white transition-all duration-300;
 }
 
 .btn-danger:hover {
-  @apply bg-danger;
+  @apply bg-[#ff4444];
   transform: translateY(-1px);
 }
 
 .btn-danger:disabled {
-  @apply cursor-not-allowed opacity-50;
+  @apply cursor-not-allowed opacity-40;
   transform: none;
 }
 
 /* ─── Layout ─────────────────────────────────────────────────────── */
 .page-shell {
-  @apply mx-auto max-w-7xl px-5 py-10 sm:px-6 lg:px-8;
+  @apply mx-auto max-w-6xl px-6 py-16 sm:px-8 lg:px-10;
 }
 
 /* ─── Typography helpers ─────────────────────────────────────────── */
 .eyebrow {
-  @apply text-[11px] font-semibold uppercase tracking-[0.15em] text-accent;
+  @apply text-[11px] font-semibold uppercase tracking-[0.18em];
+  color: #999;
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-style: normal;
 }
 
 .page-title {
-  @apply mt-2 text-3xl font-bold leading-tight text-white md:text-4xl tracking-tight;
+  @apply mt-3 text-4xl leading-[1.08] text-white md:text-5xl tracking-[-0.02em];
 }
 
 .page-copy {
-  @apply max-w-2xl text-base leading-relaxed text-muted;
+  @apply max-w-xl text-[15px] leading-[1.7] text-[#888];
+  font-family: var(--font-sans), ui-sans-serif, system-ui, sans-serif;
+  font-style: normal;
 }
 
 .metric-tile {
-  @apply rounded-xl border border-white/[0.06] bg-white/[0.02] p-4 transition-colors duration-200 hover:bg-white/[0.04];
+  @apply rounded-xl border border-white/[0.05] bg-white/[0.015] p-4 transition-colors duration-200 hover:bg-white/[0.03];
 }
 
 .divider-dot {
-  @apply mx-2 inline-block h-1 w-1 rounded-full bg-muted/30 align-middle;
+  @apply mx-2 inline-block h-1 w-1 rounded-full bg-[#444] align-middle;
 }
 
-/* ─── Glass strip (lightweight card variant) ─────────────────────── */
+/* ─── Glass strip (stat card variant) ────────────────────────────── */
 .glass-strip {
-  @apply rounded-xl border border-white/[0.06] bg-white/[0.02] transition-all duration-200 hover:bg-white/[0.04] hover:border-white/[0.1];
+  @apply rounded-xl border border-white/[0.05] bg-white/[0.015] transition-all duration-300 hover:bg-white/[0.03] hover:border-white/[0.08];
 }
 
 /* ─── Legacy compat aliases ──────────────────────────────────────── */
@@ -133,13 +186,36 @@ button, input, select, textarea {
 }
 
 .hero-wordmark {
-  color: #f0f0f5;
+  color: #e8e8ed;
 }
 
 .text-gradient {
-  @apply text-transparent bg-clip-text bg-gradient-to-r from-accent to-accentMuted;
+  background: linear-gradient(135deg, #d4ff00 0%, #fff 70%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 .clip-corner {
   border-radius: 16px;
+}
+
+/* ─── Amber glow background for sections ─────────────────────────── */
+.bg-glow-amber {
+  background-image: radial-gradient(ellipse 60% 40% at 50% 100%, rgba(180, 140, 30, 0.06), transparent);
+}
+
+.bg-glow-top {
+  background-image: radial-gradient(ellipse 60% 40% at 50% 0%, rgba(180, 140, 30, 0.06), transparent);
+}
+
+/* ─── Smooth scroll ──────────────────────────────────────────────── */
+html {
+  scroll-behavior: smooth;
+}
+
+/* ─── Selection ──────────────────────────────────────────────────── */
+::selection {
+  background: rgba(212, 255, 0, 0.2);
+  color: #fff;
 }
