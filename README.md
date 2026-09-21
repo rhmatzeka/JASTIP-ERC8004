@@ -445,3 +445,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 ## Current MVP Status
 
 Built for hackathon demo readiness. The app works locally without external services, while still including real integration paths for OpenAI, Sepolia, Supabase, Privy, and Cloudinary.
+
+## License
+
+Released under the [MIT License](LICENSE).
