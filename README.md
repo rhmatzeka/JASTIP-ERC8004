@@ -2,6 +2,8 @@
 
 AI-powered escrow and reputation layer for Indonesia's jastip economy.
 
+![Jastip Agent hero illustration: a verified sneaker order with escrow, receipt check and reputation](public/images/jastip-scan-hero.png)
+
 Jastip Agent is a hackathon MVP for **jastip** or **jasa titip**, a personal shopper flow where someone traveling abroad buys products for buyers in Indonesia and brings them home for a fee. Today this market mostly runs through WhatsApp, Instagram DM, and Twitter. Buyers often pay upfront without escrow, item verification, or a portable reputation system for jastipers.
 
 This MVP adds:
